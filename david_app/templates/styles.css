@@ -1,0 +1,43 @@
+body { background-color: #111122 }
+.custom_button_bokeh { width: 600px; }
+.custom_button_html { width: 300px; }
+.custom_button_bokeh button.bk-bs-btn.bk-bs-btn-default {
+ background-color: #5577DD;
+  border-radius: 15px;
+  border: 2px solid #f5f5f5;
+  color:#FFFFFF;
+  font-size:16px;
+  text-align: center;
+  font-family: sans-serif;
+  box-shadow: 5px 5px 5px grey;
+  height: 36px;
+  padding-top: 3px;
+}
+.custom_button_bokeh:hover, button.bk-bs-btn.bk-bs-btn-default:hover {
+    background: #223399;
+    cursor: pointer;
+}
+.custom_button_bokeh:active , button.bk-bs-btn.bk-bs-btn-default:active {
+    position: relative;
+    top: 2px;
+}
+.custom_button_html {
+ background-color: #5577DD;
+  border-radius: 15px;
+  border: 2px solid #f5f5f5;
+  color:#FFFFFF;
+  font-size:16px;
+  text-align: center;
+  font-family: sans-serif;
+  box-shadow: 5px 5px 5px grey;
+  height: 36px;
+  padding-top: 3px;
+}
+.custom_button_html:hover {
+    background: #223399;
+    cursor: pointer;
+}
+.custom_button_html:active {
+    position: relative;
+    top: 2px;
+}

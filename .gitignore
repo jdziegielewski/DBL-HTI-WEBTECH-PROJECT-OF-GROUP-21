@@ -2,3 +2,5 @@
 webtech-env/
 
 \.idea/
+
+__pycache__/
