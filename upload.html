@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <center>Upload a file</center>
+    </head>
+
+    <body>
+
+        <form enctype = "multipart/form-data" action = "http://sashagielis.pythonanywhere.com/upload" method = "POST">
+            <input type = "file" id = "file" name = "file" />
+            <input type = "submit" name = "submit" value = "Upload" />
+        </form>
+
+        {% with messages = get_flashed_messages(category_filter = ["error"]) %}
+            {% if messages %}
+                {% for message in messages %}
+                    <strong>Error: </strong> {{ message }}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% with messages = get_flashed_messages(category_filter = ["success"]) %}
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+    </body>
+</html>
