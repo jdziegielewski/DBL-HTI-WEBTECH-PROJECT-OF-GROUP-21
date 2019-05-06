@@ -28,11 +28,11 @@ def upload_file():
             flash("File has wrong extension, please upload a .csv file", "error")
             return redirect("/")
 
-        target = os.path.join(APP_ROOT, "uploaded files")
+        target = os.path.join(APP_ROOT, "uploaded file")
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        destination = "/".join([target, file.filename])
+        destination = "/".join([target, "upload.csv"])
         file.save(destination)
         flash("File successfully uploaded!", "success")
         return redirect("/")
