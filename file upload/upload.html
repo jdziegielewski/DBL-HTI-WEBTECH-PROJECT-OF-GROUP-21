@@ -6,8 +6,15 @@
     <body>
 
         <form enctype = "multipart/form-data" action = "http://sashagielis.pythonanywhere.com/upload" method = "POST">
-            <input type = "file" id = "file" name = "file" />
-            <input type = "submit" name = "submit" />
+            <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
+            <label for = "file">Choose a file</label>
+
+            <span id = "filename"></span>
+            <label for = "filename"></label>
+
+            <br/> <br/>
+            <input type = "submit" id = "submit" name = "submit" class = "uploadfile" />
+            <label for = "submit">Upload</label>
         </form>
 
         {% with messages = get_flashed_messages(category_filter = ["error"]) %}
@@ -25,6 +32,60 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+
+        <script>
+            function showFilename() {
+                var labels = document.getElementsByTagName("label");
+                for (var i = 0; i < labels.length; i++) {
+                    if (labels[i].htmlFor != "") {
+                         var elem = document.getElementById(labels[i].htmlFor);
+                         if (elem)
+                            elem.label = labels[i];
+                    }
+                }
+            	var label = document.getElementById("filename").label
+            	var labelVal = label.innerHTML;
+                var fileName = "";
+        		fileName = document.getElementById("file").value.replace(/^.*[\\\/]/, "");
+
+        		if (fileName)
+        			label.innerHTML = "Selected file: ".bold() + fileName;
+        		else if (label.innerHTML.includes("Selected file:"))
+        			label.innerHTML = labelVal;
+        		else label.innerHTML = "Selected file: ".bold() + labelVal;
+            }
+        </script>
+
+        <style>
+            .inputfile,
+            .uploadfile
+            {
+	            width: 0.1px;
+            	height: 0.1px;
+            	opacity: 0;
+            	overflow: hidden;
+            	position: absolute;
+            	z-index: -1;
+            }
+
+            .inputfile + label,
+            .uploadfile + label
+            {
+                font-size: 1.25em;
+                font-weight: 700;
+                color: white;
+                background-color: black;
+                padding: 14px 20px;
+                display: inline-block;
+            }
+
+            .inputfile + label,
+            .uploadfile + label:hover
+            {
+                background-color: black;
+                cursor: pointer;
+            }
+        </style>
 
     </body>
 </html>
