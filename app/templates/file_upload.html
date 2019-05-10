@@ -6,7 +6,8 @@
     <label for = "filename"></label>
 
     <br/> <br/>
-    <input type="submit" id=submit" name="submit" class="uploadbutton" value="Upload"/>
+    <input type = "submit" id = "submit" name = "submit" class = "uploadfile" />
+    <label for = "submit">Upload</label>
 </form>
 
 {% with messages = get_flashed_messages(category_filter = ["error"]) %}
@@ -78,20 +79,4 @@
         cursor: pointer;
     }
 
-    .uploadbutton
-    {
-        border:None; /* This removes the input button styling */
-        font-size: 1.25em;
-        font-weight: 700;
-        color: white;
-        background-color: black;
-        padding: 14px 20px;
-        display: inline-block;
-    }
-
-    .uploadbutton:hover
-    {
-        background-color: black;
-        cursor: pointer;
-    }
 </style>
