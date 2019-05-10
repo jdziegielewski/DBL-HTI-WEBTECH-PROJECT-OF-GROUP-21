@@ -5,7 +5,7 @@
 
     <body>
 
-        <form enctype = "multipart/form-data" action = "localhost:5000/upload" method = "POST">
+        <form enctype = "multipart/form-data" action = "http://127.0.0.1:5000/upload" method = "POST">
             <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
             <label for = "file">Choose a file</label>
 
@@ -40,19 +40,20 @@
                     if (labels[i].htmlFor != "") {
                          var elem = document.getElementById(labels[i].htmlFor);
                          if (elem)
-                            elem.label = labels[i];
+                         elem.label = labels[i];
                     }
                 }
-            	var label = document.getElementById("filename").label
-            	var labelVal = label.innerHTML;
-                var fileName = "";
-        		fileName = document.getElementById("file").value.replace(/^.*[\\\/]/, "");
+                var label = document.getElementById("filename").label
+            	  var labelVal = label.innerHTML;
 
-        		if (fileName)
-        			label.innerHTML = "Selected file: ".bold() + fileName;
-        		else if (label.innerHTML.includes("Selected file:"))
-        			label.innerHTML = labelVal;
-        		else label.innerHTML = "Selected file: ".bold() + labelVal;
+                var fileName = "";
+        		    fileName = document.getElementById("file").value.replace(/^.*[\\\/]/, "");
+
+        		    if (fileName)
+        			       label.innerHTML = "Selected file: ".bold() + fileName;
+        		    else if (label.innerHTML.includes("Selected file:"))
+        			       label.innerHTML = labelVal;
+        		    else label.innerHTML = "Selected file: ".bold() + labelVal;
             }
         </script>
 
@@ -60,12 +61,12 @@
             .inputfile,
             .uploadfile
             {
-	            width: 0.1px;
-            	height: 0.1px;
-            	opacity: 0;
-            	overflow: hidden;
-            	position: absolute;
-            	z-index: -1;
+                width: 0.1px;
+                height: 0.1px;
+                opacity: 0;
+                overflow: hidden;
+                position: absolute;
+                z-index: -1;
             }
 
             .inputfile + label,
