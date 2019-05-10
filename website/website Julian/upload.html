@@ -5,7 +5,7 @@
 
     <body>
 
-        <form enctype = "multipart/form-data" action = "http://sashagielis.pythonanywhere.com/upload" method = "POST">
+        <form enctype = "multipart/form-data" action = "localhost:5000/upload" method = "POST">
             <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
             <label for = "file">Choose a file</label>
 
@@ -13,8 +13,7 @@
             <label for = "filename"></label>
 
             <br/> <br/>
-            <input type = "submit" id = "submit" name = "submit" class = "uploadfile" />
-            <label for = "submit">Upload</label>
+            <input type="submit" id = "submit" name = "submit" class = "uploadfile" value="Upload">
         </form>
 
         {% with messages = get_flashed_messages(category_filter = ["error"]) %}
@@ -35,6 +34,7 @@
 
         <script>
             function showFilename() {
+                alert("FILE");
                 var labels = document.getElementsByTagName("label");
                 for (var i = 0; i < labels.length; i++) {
                     if (labels[i].htmlFor != "") {
@@ -43,8 +43,8 @@
                             elem.label = labels[i];
                     }
                 }
-            	var label = document.getElementById("filename").label
-            	var labelVal = label.innerHTML;
+            	var label = document.getElementById("filename").label;
+                var labelVal = label.innerHTML;
                 var fileName = "";
         		fileName = document.getElementById("file").value.replace(/^.*[\\\/]/, "");
 

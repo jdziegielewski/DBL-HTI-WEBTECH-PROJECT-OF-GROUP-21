@@ -1,0 +1,104 @@
+import networkx as nx
+import holoviews as hv
+from holoviews import opts
+from bokeh.models import Button, Panel, Tabs
+from bokeh.layouts import column, row, WidgetBox
+
+from bokeh.core.properties import String
+from bokeh.io import curdoc
+from bokeh.layouts import column
+from bokeh.models import Button, LayoutDOM
+
+
+renderer = hv.renderer('bokeh').instance(mode='server')
+
+
+def heatmap_from_network(G, tools=None):
+    adjacency_matrix = nx.to_numpy_matrix(G)
+
+    n = len(G.nodes)
+    #triplets = [(i, j, adjacency_matrix[i, j]) for j in range(n) for i in range(n)]
+
+    triplets = []
+    for i in range(n):
+        for j in range(n):
+            triplets.append((i, j, adjacency_matrix[i, j]))
+
+    h = hv.HeatMap(triplets, vdims=['z'])
+    h.opts(opts.HeatMap(tools=tools))
+    h.opts(xrotation=45, xaxis='top', labelled=[], responsive=True)
+    return h
+
+
+def nodelink_from_network(G, tools=None):
+    h = hv.Graph.from_networkx(G, nx.layout.circular_layout)
+    h.opts(opts.Graph(tools=tools))
+    h.opts(xaxis=None, yaxis=None, responsive=True)
+    return h
+
+
+def get_plot(hv_element):
+    return renderer.get_plot(hv_element).state
+
+
+def create_dashboard(G):
+    tools = ['box_select', 'hover']
+
+    view1 = nodelink_from_network(G, tools)
+    view2 = heatmap_from_network(G, tools)
+
+    hv_plot = get_plot(view1 + view2)
+
+    #file_input = FileInput()
+
+    button1 = Button(label='Button 1')
+    button2 = Button(label='Button 2')
+    button3 = Button(label='Button 3')
+    button4 = Button(label='Button 4')
+    button5 = Button(label='Button 5')
+    button6 = Button(label='Button 6')
+    button7 = Button(label='Button 7')
+    button8 = Button(label='Button 8')
+
+    controls1 = WidgetBox(button1, button2, button3)
+    controls2 = WidgetBox(button4, button5)
+    controls3 = WidgetBox(button6, button7, button8)
+
+    tab1 = Panel(child=controls1, title='Test Tab 1')
+    tab2 = Panel(child=controls2, title='Test Tab 2')
+    tab3 = Panel(child=controls3, title='More settings')
+    tabs = Tabs(tabs=[tab1, tab2, tab3])
+
+    column1 = column(tabs, sizing_mode='scale_height')
+
+    dashboard = row(column1, hv_plot, sizing_mode='scale_both')
+    return dashboard
+
+
+IMPL = """
+import * as p from "core/properties"
+import {LayoutDOM, LayoutDOMView} from "models/layouts/layout_dom"
+
+export class FileInputView extends LayoutDOMView
+  initialize: (options) ->
+    super(options)
+    input = document.createElement("input")
+    input.type = "file"
+    input.onchange = () =>
+      @model.value = input.value
+    @el.appendChild(input)
+
+export class FileInput extends LayoutDOM
+  default_view: FileInputView
+  type: "FileInput"
+  @define {
+    value: [ p.String ]
+  }
+"""
+
+class FileInput(LayoutDOM):
+    __implementation__ = IMPL
+    value = String()
+
+def upload():
+    print(input.value)

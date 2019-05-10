@@ -3,11 +3,50 @@ import networkx as nx
 import holoviews as hv
 from bokeh.plotting import figure
 from bokeh.models import HoverTool, ColumnDataSource
+from holoviews import opts
 
 
 def plot_network(G):
-    return hv.HeatMap((['A', 'B', 'C'], ['a', 'b', 'c', 'd', 'e'], np.random.rand(5, 3)))
-    #return hv.Image((range(10), range(5), np.random.rand(5, 10)), datatype=['grid'])
+    N = len(G.nodes)
+
+    adjacency_matrix = nx.to_numpy_matrix(G)
+
+    weights = []
+    for i in range(N):
+        for j in range(N):
+            idx = i * N + j
+            weights.append((i, j, adjacency_matrix[i, j], idx, False))
+
+    source = ColumnDataSource(
+        data=dict(
+            edges=weights
+        )
+    )
+
+    heatmap = hv.HeatMap(weights, vdims=['z', 'idx', 'selected'])
+    print("Heatmap columns:", heatmap.columns())
+    #heatmap.opts(opts.HeatMap(tools=['hover', 'box_select'], width=325))
+    return heatmap, source
+
+
+def plot_network_colored(G):
+    N = len(G.nodes)
+
+    adjacency_matrix = nx.to_numpy_matrix(G)
+
+    weights = []
+    for i in range(N):
+        for j in range(N):
+            weight = adjacency_matrix[i, j]
+            weights.append((i, j, weight))
+
+    color = []
+    #for i in selected:
+
+
+    heatmap = hv.HeatMap(weights, vdims=['z'])
+    heatmap.opts(opts.HeatMap(tools=['hover', 'box_select'], width=325))
+    return heatmap, weights
 
 
 def plot(G):
