@@ -1,0 +1,25 @@
+<form enctype = "multipart/form-data" action = "/files" method = "POST">
+    <input type="file" value="Choose a file" id="file" name="file" class="inputfile" onchange = "showFilename();" />
+
+    <span id="filename"></span>
+    <label for="filename"></label>
+
+    <br/> <br/>
+    <input type="submit" id=submit" name="submit" class="uploadfile" value="Upload"/>
+</form>
+
+{% with messages = get_flashed_messages(category_filter = ["error"]) %}
+    {% if messages %}
+        {% for message in messages %}
+            <strong>Error: </strong> {{ message }}
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% with messages = get_flashed_messages(category_filter = ["success"]) %}
+    {% if messages %}
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    {% endif %}
+{% endwith %}

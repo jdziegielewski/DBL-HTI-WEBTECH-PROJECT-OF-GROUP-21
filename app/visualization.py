@@ -35,7 +35,7 @@ def get_plot(hv_element):
     return renderer.get_plot(hv_element).state
 
 
-def create_dashboard(G):
+def create_dashboard(G, filename='None'):
     tools = ['box_select', 'hover']
 
     view1 = nodelink_from_network(G, tools)
@@ -48,17 +48,15 @@ def create_dashboard(G):
     button3 = Button(label='Button 3')
     button4 = Button(label='Button 4')
     button5 = Button(label='Button 5')
-    button6 = Button(label='Button 6')
-    button7 = Button(label='Button 7')
-    button8 = Button(label='Button 8')
+    button6 = Button(label=filename)
 
     controls1 = WidgetBox(button1, button2, button3)
     controls2 = WidgetBox(button4, button5)
-    controls3 = WidgetBox(button6, button7, button8)
+    controls3 = WidgetBox(button6)
 
-    tab1 = Panel(child=controls1, title='Test Tab 1')
-    tab2 = Panel(child=controls2, title='Test Tab 2')
-    tab3 = Panel(child=controls3, title='More settings')
+    tab1 = Panel(child=controls1, title='Settings')
+    tab2 = Panel(child=controls2, title='More settings')
+    tab3 = Panel(child=controls3, title='File info')
     tabs = Tabs(tabs=[tab1, tab2, tab3])
 
     column1 = column(tabs, sizing_mode='scale_height')

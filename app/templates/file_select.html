@@ -1,0 +1,7 @@
+{% if files %}<!--if there are files, list them-->
+<h1>Uploaded Files</h1>
+{% for file in files %}
+    <!--link to file page, placeholder-->
+    <p><a href="/visualization/{{file}}">{{file}}</a></p>
+{% endfor %}
+{% endif %}

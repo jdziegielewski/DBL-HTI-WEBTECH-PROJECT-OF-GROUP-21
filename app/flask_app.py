@@ -1,3 +1,4 @@
+import pandas as pd
 import os
 from flask import Flask, render_template, request
 from bokeh.embed import components
@@ -16,8 +17,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = ["csv"]
 
-G = nx.karate_club_graph()
-dashboard = visualization.create_dashboard(G)
+LAST_FILE = ""
 
 
 @app.route('/')
@@ -25,24 +25,42 @@ def index():
     return render_template("index.html", template="Flask")
 
 
-@app.route('/vis')
-def visualization():
+@app.route('/visualization')
+def redirect_to_files():
+    #if last_selected_file is not None:
+        #return redirect('/visualization/' + last_selected_file)
+    return redirect('/files')
+
+
+@app.route('/visualization/<filename>')
+def visualize_file(filename):
+    graph = load_local(filename)
+    dashboard = visualization.create_dashboard(graph, filename)
     script, div = components(dashboard)
     return render_template("visualization.html", script=script, div=div, template="Flask")
 
 
-@app.route("/upload", methods=["POST", "GET"])
-def upload_file():
+def load_local(filename, sep=';', clean=True):
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    df = pd.read_csv(path, sep=sep)
+    if clean:
+        df = df.loc[:, df.columns[1:]]
+    dg = nx.DiGraph(df.values)
+    return dg
+
+
+@app.route("/files", methods=["POST", "GET"])
+def files():
     if request.method == 'POST':
         if "file" not in request.files:
             flash("No file selected", "error")
-            return redirect("/upload")
+            return redirect("/files")
 
         file = request.files["file"]
 
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a .csv file", "error")
-            return redirect("/upload")
+            return redirect("/files")
 
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
         if not os.path.isdir(target):
@@ -51,10 +69,12 @@ def upload_file():
         destination = "/".join([target, file.filename])
         file.save(destination)
         flash("File successfully uploaded!", "success")
-        return redirect("/upload")
+        return redirect("/files")
 
     else:
-        return render_template("upload.html", template="Flask")
+        target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
+        uploaded_files = os.listdir(target)
+        return render_template("files.html", files=uploaded_files, template="Flask")
 
 
 def allowed_file(filename):
