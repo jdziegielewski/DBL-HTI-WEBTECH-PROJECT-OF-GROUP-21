@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>DBL HTI+Webtech Group 21</title>
+        <meta name="description" content="DBL HTI+Webtech project of group 21"/>
+        <meta name="keywords" content="TU/e,DBL,HTI+Webtech"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+        <style type="text/css">{% include 'css1.css' %}</style>
+        {% block head %}
+        {% endblock head %}
+    </head>
+    <body>
+        <header>
+            <h1 class="logo">DBL HTI+Webtech project of group 21</h1>
+            <nav id="topnav">
+                <ul class="menu">
+                    <li><a href="/">Project</a></li>
+                    <li><a href="/vis">Visualization</a></li>
+                    <li><a href="/upload">Upload database</a></li>
+                    <li><a href="/">About Group 21</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div id="content">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </main>
+
+        <footer>
+            <div id="footerlogo">
+                <img src="static/logotue.png"  width="200 " height="50"  alt=""/><br/>
+                all rights reserved &copy
+            </div>
+        </footer>
+    </body>
+</html>
