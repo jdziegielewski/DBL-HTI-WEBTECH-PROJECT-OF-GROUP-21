@@ -3,7 +3,7 @@ HOW TO USE
 1. Open a command prompt and navigate to this folder
 
 2. Run the following commands:
-	'set FLASK_APP=upload_new.py'
+	'set FLASK_APP=flask_app_new.py'
 	'flask run'
 	
 3. Open the browser to localhost:5000
