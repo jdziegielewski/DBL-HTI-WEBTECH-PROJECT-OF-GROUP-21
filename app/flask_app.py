@@ -1,14 +1,9 @@
-import pandas as pd
 import os
-from flask import Flask, render_template, request
-from bokeh.embed import components
 import visualization
+import pandas as pd
 import networkx as nx
-# from bokeh.plotting import curdoc
-import os
-from bokeh.client import pull_session
-from bokeh.embed import server_session
-from flask import Flask, render_template, request, redirect, flash
+from bokeh.embed import components
+from flask import Flask, render_template, session, request, redirect, flash
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
@@ -22,22 +17,29 @@ LAST_FILE = ""
 
 @app.route('/')
 def index():
-    return render_template("index.html", template="Flask")
+    return render_template("index.html", last_file=get_last_file())
 
 
 @app.route('/visualization')
 def redirect_to_files():
-    #if last_selected_file is not None:
-        #return redirect('/visualization/' + last_selected_file)
+    if 'last_file' in session:
+        return redirect('/visualization/' + session['last_file'])
     return redirect('/files')
 
 
 @app.route('/visualization/<filename>')
 def visualize_file(filename):
+    session['last_file'] = filename
     graph = load_local(filename)
     dashboard = visualization.create_dashboard(graph, filename)
     script, div = components(dashboard)
-    return render_template("visualization.html", script=script, div=div, template="Flask")
+    return render_template("visualization.html", script=script, div=div, last_file=get_last_file())
+
+
+@app.route('/close')
+def close_file():
+    session.clear()
+    return redirect('/files')
 
 
 def load_local(filename, sep=';', clean=True):
@@ -74,11 +76,21 @@ def files():
     else:
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
         uploaded_files = os.listdir(target)
-        return render_template("files.html", files=uploaded_files, template="Flask")
+        return render_template("files.html", files=uploaded_files, last_file=get_last_file())
 
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def get_last_file():
+    return retrieve_or_default(session, 'last_file', 'Visualization')
+
+
+def retrieve_or_default(dict, key, default):
+    if key in dict:
+        return dict[key]
+    return default
 
 
 if __name__ == '__main__':

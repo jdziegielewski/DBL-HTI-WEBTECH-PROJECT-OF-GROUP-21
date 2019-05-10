@@ -48,6 +48,7 @@ def create_dashboard(G, filename='None'):
     button3 = Button(label='Button 3')
     button4 = Button(label='Button 4')
     button5 = Button(label='Button 5')
+
     button6 = Button(label=filename)
 
     controls1 = WidgetBox(button1, button2, button3)
