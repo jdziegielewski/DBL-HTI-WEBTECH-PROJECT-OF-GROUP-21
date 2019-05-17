@@ -60,6 +60,10 @@ def files():
 
         file = request.files["file"]
 
+        if file.filename == "":
+            flash("No file selected", "error")
+            return redirect("/files")
+        
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a .csv file", "error")
             return redirect("/files")
