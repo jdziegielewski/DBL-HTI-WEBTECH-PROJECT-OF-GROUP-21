@@ -1,67 +1,102 @@
-body{
-		background-color:gray;
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:500&display=swap');
+
+*{
+	box-sizing : border-box;
+	margin : 0;
+	padding : 0;
+	font-family : "Ubuntu", sand-serif;
+	color:#232C31;
+}
+li, a {
+	font-family : "Ubuntu", sand-serif;
+	font-weight : 500;
+	font-size : 18px;
+	color : #7CC6FE;
+	text-decoration : none;
+}
+header {
+	display : flex;
+	justify-content : flex-end;
+	align-items : center;
+	padding : 25px 3%;
+}
+h1.logo {
+	font-family : "Ubuntu", sand-serif;
+	margin-right : auto;
+	color : #FFBF00;
+	cursor : default;
+	font-size : 19px;
 }
 
-h1.logo{
-	font-size: 44px;
-	font-weight: 700;
-	color: white;
-	text-align: center;
-	text-transform: uppercase;
-	letter-spacing: 5px;
-	margin-top: 50px;
-	margin-bottom: 40px;
+.menu {
+	list-style : none;	
 }
-#topnav{
-	background-color: #303030;
-	text-align: center;
-}
-
-.menu
-{
-	list-style-type: none;
-	margin: 0;
-	padding: 10px;
-	font-size: 18px;
-	min-height: 38px;
-	line-height: 200%;
-}
-
-.menu > li{
-	display: inline-block;
-	padding-left: 20px;
-	padding-right: 20px;
-	border-right: 1px dashed white;
-}
-
-.menu > li:first-child{
-	border-left: 1px dashed white;
-}
-
-.menu a{
-	color: white;
-	text-decoration: none;
-}
-
-.menu a:hover{
-	color: grey;
-}
+.menu li {
+	display : inline-block;
+	padding : 0px 20px;
 	
+}
+
+.menu li  a {
+	transition : all 0.2s ease 0s;
+	
+}
+.menu li  a:hover{
+	color : #F6BBB4;
+}
+
 #content{
 		min-height: 620px;
 		padding: 10px;
-		background-color: #dedede;
+		background-color: #D9DBF1;
 		margin-left:auto;
 		margin-right:auto;
 	}	
+footer {
+	display : flex;
+	justify-content : center;
+	align-items : center;
+	padding : 20px 5%;
+	color:#232C31;
+	list-style : none;	
 	
-#footerlogo{
-		margin-left: auto;
-		margin-right: auto;
-		text-align: center;
-		padding: 20px;
-		text-transform: uppercase;
-		color:white;
-	}
+}
 
+
+.inputfile,
+    .uploadfile
+    {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+
+    }
+
+    .inputfile + label,
+    .uploadfile + label
+    {
+       width: 145px;
+	   font-size: 1.25em;
+        font-weight: 700;
+		text-align: center;
+        color: white;
+        background-color: #FFBF00;
+        padding: 16px;
+        display: inline-block;
+		-webkit-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
+		-moz-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
+		box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
+		border-radius:5px;
+		box-sizing: border-box;
+    }
+
+    .inputfile + label,
+    .uploadfile + label:hover
+    {
+        background-color: #F6BBB4;
+        cursor: pointer;
+    }
 

@@ -1,4 +1,8 @@
+ <style type="text/css">{% include 'css1.css' %}</style>
 <form enctype = "multipart/form-data" action = "/files" method = "POST">
+<br> </br>
+
+	
     <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
     <label for = "file">Choose a file</label>
 
@@ -49,34 +53,4 @@
     }
 </script>
 
-<style>
-    .inputfile,
-    .uploadfile
-    {
-        width: 0.1px;
-        height: 0.1px;
-        opacity: 0;
-        overflow: hidden;
-        position: absolute;
-        z-index: -1;
-    }
 
-    .inputfile + label,
-    .uploadfile + label
-    {
-        font-size: 1.25em;
-        font-weight: 700;
-        color: white;
-        background-color: black;
-        padding: 14px 20px;
-        display: inline-block;
-    }
-
-    .inputfile + label,
-    .uploadfile + label:hover
-    {
-        background-color: black;
-        cursor: pointer;
-    }
-
-</style>
