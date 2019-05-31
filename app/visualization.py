@@ -4,8 +4,7 @@ from holoviews import opts
 from bokeh.models import Button, Panel, Tabs
 from bokeh.layouts import column, row, WidgetBox
 
-renderer = hv.renderer('bokeh').instance(mode='server')
-
+renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
 def heatmap_from_network(G, tools=None):
     adjacency_matrix = nx.to_numpy_matrix(G)
