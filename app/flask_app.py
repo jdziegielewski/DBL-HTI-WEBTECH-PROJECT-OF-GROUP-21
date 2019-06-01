@@ -14,7 +14,6 @@ ALLOWED_EXTENSIONS = ["csv"]
 
 LAST_FILE = ""
 
-
 @app.route('/')
 def index():
     return render_template("index.html", last_file=get_last_file())
