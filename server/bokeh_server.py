@@ -9,7 +9,7 @@ renderer = hv.renderer('bokeh').instance(mode='server')
 
 
 def start(rendered_app):
-    new_server = Server({'/': rendered_app, '/upload': }, port=5006, allow_websocket_origin=['localhost:5000'])
+    new_server = Server({'/': rendered_app}, port=5006, allow_websocket_origin=['*'])
     new_server.start()
     new_loop = IOLoop.current()
     new_loop.start()
