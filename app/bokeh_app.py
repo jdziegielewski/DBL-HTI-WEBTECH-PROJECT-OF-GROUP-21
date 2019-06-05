@@ -17,22 +17,24 @@ from collections import OrderedDict as odict
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
-
-def load_local(filename, sep=';'):
+def create_dataframe(filename, sep=';'):
     path = os.path.join("uploads", filename)
-    df = pd.read_csv(path, sep=sep, index_col=0)
-    # df.values[[np.arange(df.shape[0])] * 2] = 0
-    df = df.stack().reset_index()
-    df = df[df[0] > 0]
-    df.columns = ['start', 'end', 'weight']
-    df = df.reset_index()
-    df['edge_idx'] = df.index
-    return df
+    dataframe = pd.read_csv(path, sep=sep, index_col=0)
+    return dataframe
 
+def create_edge_list(dataframe, sep=';'):
+    # df.values[[np.arange(df.shape[0])] * 2] = 0
+    edge_list = dataframe.stack().reset_index()
+    #df = df[df[0] > 0]
+    edge_list.columns = ['start', 'end', 'weight']
+    edge_list = edge_list.reset_index()
+    edge_list['edge_idx'] = edge_list.index
+    return edge_list
 
 filename = sys.argv[1]
-dataset = load_local(filename)
-dataset = hv.Table(dataset)
+dataframe = create_dataframe(filename)
+edge_list = create_edge_list(dataframe)
+dataset = hv.Table(edge_list)
 tools = ['box_select', 'hover', 'tap']
 
 cmaps = {'Colorcet -- Fire': colorcet.fire,
@@ -159,7 +161,6 @@ class NodeLink(pm.Parameterized):
             * dynspread(datashade(self.dyn_edge_select, cmap=self.param.esel_col, alpha=self.param.esel_alpha), max_px=100)
         #hv_plot.opts(bgcolor=self.param.bg_col)
         return hv_plot
-
 
 class AdMatrix(pm.Parameterized):
     markers = {'Square': 's',
