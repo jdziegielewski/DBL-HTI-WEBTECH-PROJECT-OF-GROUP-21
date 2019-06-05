@@ -3,13 +3,11 @@ import holoviews as hv
 from holoviews import opts
 from bokeh.models import Button, Panel, Tabs
 from bokeh.layouts import column, row, WidgetBox
-from algorithms import groupNodes
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
 def heatmap_from_network(G, tools=None):
     adjacency_matrix = nx.to_numpy_matrix(G)
-    #groups = groupNodes(G)
     n = len(G.nodes)
     #triplets = [(i, j, adjacency_matrix[i, j]) for j in range(n) for i in range(n)]
 
@@ -64,3 +62,4 @@ def create_dashboard(G, filename='None'):
 
     dashboard = row(column1, hv_plot, sizing_mode='scale_both')
     return dashboard
+
