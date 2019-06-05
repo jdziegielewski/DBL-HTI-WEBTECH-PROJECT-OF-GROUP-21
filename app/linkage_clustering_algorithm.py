@@ -2,9 +2,8 @@ from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 import pandas as pd
 
-def linkage_clustering(linkage_type, number_of_clusters):
+def linkage_clustering(dataframe, linkage_type, number_of_clusters):
     # INPUT
-    dataframe = create_dataframe(filename)
     number_of_clusters = 3
     linkage_type = "complete"
 
