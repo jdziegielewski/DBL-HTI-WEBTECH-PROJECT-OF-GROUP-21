@@ -47,19 +47,41 @@ h1.logo {
 
 #content{
 		min-height: 620px;
-		padding: 10px;
 		background-color: #D9DBF1;
 		margin-left:auto;
 		margin-right:auto;
+		
 	}	
+	#content1{
+		min-height: 620px;
+		width:50%;
+		padding: 10px;
+		background-color: #FFBF00;
+		margin-left:auto;
+		margin-right:auto;
+		box-sizing : border-box;
+		float:left;
+
+	}
+	#content2{
+		min-height: 620px;
+		width:50%;
+		padding: 20px;
+		background-color: #F6BBB4;
+		margin-left:auto;
+		margin-right:auto;
+		text-align:justify;
+		float:right;
+	}
+	
 footer {
 	display : flex;
 	justify-content : center;
 	align-items : center;
 	padding : 20px 5%;
 	color:#232C31;
-	list-style : none;	
-	
+	list-style : none;
+	clear:both;
 }
 
 

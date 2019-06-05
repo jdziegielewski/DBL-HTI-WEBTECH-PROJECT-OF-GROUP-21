@@ -18,17 +18,24 @@
                     <li><a href="/">Project</a></li>
                     <li><a href="/visualization">{{ last_file }}</a></li>
                     <li><a href="/files">Files</a></li>
-                    <li><a href="/">About Group 21</a></li>
                 </ul>
             </nav>
         </header>
 
         <main>
-            <div id="content">
-                {% block content %}
-                {% endblock content %}
+		<div id="content">
+		
+            <div id="content1">
+                {% block content1 %}
+                {% endblock content1%}
             </div>
-        </main>
+			<div id="content2">
+                {% block content2 %}
+                {% endblock content2%}
+            </div> 
+			</div>
+        
+		</main>
 
         <footer>
             <img class="logotue" src="../static/logotue.png"  width="220 " height="44"  alt="logo"/>
