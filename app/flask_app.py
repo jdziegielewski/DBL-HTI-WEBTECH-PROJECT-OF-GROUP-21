@@ -1,8 +1,11 @@
 import os
+import numpy as np
 import visualization
 import pandas as pd
 import networkx as nx
 from bokeh.embed import components
+from bokeh.client import pull_session
+from bokeh.embed import server_session
 from flask import Flask, render_template, session, request, redirect, flash
 
 app = Flask(__name__)
@@ -21,9 +24,12 @@ def index():
 
 @app.route('/visualization')
 def redirect_to_files():
-    if 'last_file' in session:
-        return redirect('/visualization/' + session['last_file'])
-    return redirect('/files')
+    with pull_session(url="http://localhost:5006/") as s:
+        script = server_session(session_id=s.id, url='http://localhost:5006/')
+    return render_template("visualization.html", script=script, last_file=get_last_file())
+    #if 'last_file' in session:
+        #return redirect('/visualization/' + session['last_file'])
+    #return redirect('/files')
 
 
 @app.route('/visualization/<filename>')
@@ -34,7 +40,6 @@ def visualize_file(filename):
     script, div = components(dashboard)
     return render_template("visualization.html", script=script, div=div, last_file=get_last_file())
 
-
 @app.route('/close')
 def close_file():
     session.clear()
@@ -43,11 +48,12 @@ def close_file():
 
 def load_local(filename, sep=';', clean=True):
     path = os.path.join(UPLOAD_FOLDER, filename)
-    df = pd.read_csv(path, sep=sep)
-    if clean:
-        df = df.loc[:, df.columns[1:]]
-    dg = nx.DiGraph(df.values)
-    return dg
+    df = pd.read_csv(path, sep=sep, index_col=0)
+    df = df.stack().reset_index()
+    df = df[df[0] > 0]
+    df.columns = ['start', 'end', 'weight']
+    #dg = nx.from_pandas_adjacency(df)
+    return df
 
 
 @app.route("/files", methods=["POST", "GET"])
