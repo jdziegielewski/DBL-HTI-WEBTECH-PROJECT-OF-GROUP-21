@@ -1,7 +1,7 @@
 import os
 import sys
 import colorcet
-# import numpy as np
+import numpy as np
 import panel as pn
 import param as pm
 import pandas as pd
@@ -17,24 +17,39 @@ from collections import OrderedDict as odict
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
-def create_dataframe(filename, sep=';'):
-    path = os.path.join("uploads", filename)
-    dataframe = pd.read_csv(path, sep=sep, index_col=0)
-    return dataframe
-
-def create_edge_list(dataframe, sep=';'):
+def create_node_link_dataset(dataframe):
     # df.values[[np.arange(df.shape[0])] * 2] = 0
     edge_list = dataframe.stack().reset_index()
-    #df = df[df[0] > 0]
+    edge_list = edge_list[edge_list[0] > 0]
     edge_list.columns = ['start', 'end', 'weight']
     edge_list = edge_list.reset_index()
+
+    index_edge_list = np.unique(edge_list[["start", "end"]].values)
+    index_dataframe = dataframe.index
+    if len(index_edge_list) != len(index_dataframe):
+        diff = set(index_dataframe) - set(index_edge_list)
+        for i in diff:
+            edge_list = edge_list.append({"start" : i, "end" : i, "weight" : 0}, ignore_index=True)
+
     edge_list['edge_idx'] = edge_list.index
-    return edge_list
+    dataset = hv.Table(edge_list)
+    return dataset
+
+def create_ad_matrix_dataset(dataframe):
+    # df.values[[np.arange(df.shape[0])] * 2] = 0
+    edge_list = dataframe.stack().reset_index()
+    edge_list.columns = ['start', 'end', 'weight']
+    edge_list = edge_list.reset_index()
+
+    edge_list['edge_idx'] = edge_list.index
+    dataset = hv.Table(edge_list)
+    return dataset
 
 filename = sys.argv[1]
-dataframe = create_dataframe(filename)
-edge_list = create_edge_list(dataframe)
-dataset = hv.Table(edge_list)
+path = os.path.join("uploads", filename)
+dataframe = pd.read_csv(path, sep=';', index_col=0)
+node_link_dataset = create_node_link_dataset(dataframe)
+ad_matrix_dataset = create_ad_matrix_dataset(dataframe)
 tools = ['box_select', 'hover', 'tap']
 
 cmaps = {'Colorcet -- Fire': colorcet.fire,
@@ -51,7 +66,6 @@ cmaps = {'Colorcet -- Fire': colorcet.fire,
 
 def disable_logo(plot, element):
     plot.state.toolbar.logo = None
-
 
 class NodeLink(pm.Parameterized):
     layout_dict = {'Circular': nx.layout.circular_layout,
@@ -81,7 +95,7 @@ class NodeLink(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
-        self.graph = hv.Graph(dataset, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
+        self.graph = hv.Graph(node_link_dataset, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
         self.bundled_graph = None
         self.edges = None
         self.nodes = None
@@ -113,7 +127,7 @@ class NodeLink(pm.Parameterized):
         if new_graph:
             self.edges = new_graph.edgepaths
             if not self.last_bundle:
-                self.edges = self.edges.add_dimension('weight', 0, dataset.dframe(dimensions=['weight'])['weight'],
+                self.edges = self.edges.add_dimension('weight', 0, node_link_dataset.dframe(dimensions=['weight'])['weight'],
                                                       vdim=True)
             self.nodes = new_graph.nodes
             self.nodes.opts(opts.Nodes(tools=tools))
@@ -177,7 +191,7 @@ class AdMatrix(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
-        self.matrix = hv.Points(dataset, kdims=['start', 'end'], vdims=['weight'])
+        self.matrix = hv.Points(ad_matrix_dataset, kdims=['start', 'end'], vdims=['weight'])
         self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
         self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
         self.matrix.opts(xaxis=None, yaxis=None, responsive=True, aspect=1, finalize_hooks=[disable_logo])
@@ -211,8 +225,8 @@ class AdMatrix(pm.Parameterized):
 
 def modify_doc(doc):
     # dashboard = Dashboard()
-    nodelink = NodeLink(dataset, name='')
-    admatrix = AdMatrix(dataset, name='')
+    nodelink = NodeLink(node_link_dataset, name='')
+    admatrix = AdMatrix(ad_matrix_dataset, name='')
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
     view1 = nodelink.start()
