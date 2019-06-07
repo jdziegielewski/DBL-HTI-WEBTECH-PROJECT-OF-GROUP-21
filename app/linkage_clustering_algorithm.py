@@ -27,8 +27,5 @@ def linkage_clustering(dataframe, linkage_type, number_of_clusters):
         for j in range(len(final_clustering)):
             ordered_dataframe.iloc[i,j] = dataframe.iloc[final_clustering[i],final_clustering[j]]
 
-    edge_list = create_edge_list(ordered_dataframe)
-    dataset = hv.Table(edge_list)
-
     # OUTPUT
-    return dataset
+    return ordered_dataframe
