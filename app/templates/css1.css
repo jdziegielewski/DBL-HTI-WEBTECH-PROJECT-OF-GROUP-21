@@ -45,17 +45,17 @@ h1.logo {
 	color : #F6BBB4;
 }
 
-#content{
-		min-height: 620px;
+.content{
+		min-height: 720px;
 		background-color: #D9DBF1;
 		margin-left:auto;
 		margin-right:auto;
 		
 	}	
-	#content1{
-		min-height: 620px;
+	.content1-md-2{
+		min-height: 720px;
 		width:50%;
-		padding: 10px;
+		padding: 20px;
 		background-color: #FFBF00;
 		margin-left:auto;
 		margin-right:auto;
@@ -63,8 +63,8 @@ h1.logo {
 		float:left;
 
 	}
-	#content2{
-		min-height: 620px;
+	.content2-md-2{
+		min-height: 720px;
 		width:50%;
 		padding: 20px;
 		background-color: #F6BBB4;
@@ -121,4 +121,6 @@ footer {
         background-color: #F6BBB4;
         cursor: pointer;
     }
-
+.img-responsive { 
+    width:100%;
+}
