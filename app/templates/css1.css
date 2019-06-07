@@ -52,9 +52,9 @@ h1.logo {
 		margin-right:auto;
 		
 	}	
-	.content1-md-2{
+	.content1-md-6{
 		min-height: 720px;
-		width:50%;
+		width:30%;
 		padding: 20px;
 		background-color: #FFBF00;
 		margin-left:auto;
@@ -63,9 +63,9 @@ h1.logo {
 		float:left;
 
 	}
-	.content2-md-2{
+	.content2-md-6{
 		min-height: 720px;
-		width:50%;
+		width:70%;
 		padding: 20px;
 		background-color: #F6BBB4;
 		margin-left:auto;
