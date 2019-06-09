@@ -1,26 +1,23 @@
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <style type="text/css">{% include 'css1.css' %}</style>
+ <style type="text/css">{% include 'css1.css' %}</style>
+ 
 {% extends "base.html" %}
-
 {% block content1 %}
-The Group:
+<div class="row">
+					<div class="col-sm-2 col-md-4 group">
+						The Group:
 <br></br>
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
 		<figure>
 			<img class="img-fluid" src="../static/mark.jpg" >
 		</figure>
 	</div>
-	<div class="col-md-8">
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
 		<p>
 			David Debnar
 		</p>
 		<p>
-			Scrum Master
+			Scrum Master, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ut.
 		</p>
 	</div>
 
@@ -28,12 +25,12 @@ The Group:
 <br></br>
 
 
-	<div class="col-md-4">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
 		<figure>
 			<img class="img-fluid" src="../static/Jeff.jpg" >
 		</figure>
 	</div>
-	<div class="col-md-8">
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
 		<p>
 			Jeroen Oerlemans
 		</p>
@@ -46,12 +43,12 @@ The Group:
 <br></br>
 
 
-	<div class="col-md-4">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
 		<figure>
 			<img class="img-fluid" src="../static/elon.jpg" >
 		</figure>
 	</div>
-	<div class="col-md-8">
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
 		<p>
 			Julian Dziegielewski
 		</p>
@@ -65,12 +62,12 @@ The Group:
 <br></br>
 
 
-	<div class="col-md-4">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
 		<figure>
 			<img class="img-fluid" src="../static/larry.jpg" >
 		</figure>
 	</div>
-	<div class="col-md-8">
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
 		<p>
 			Sasha Gielis
 		</p>
@@ -83,12 +80,12 @@ The Group:
 <br></br>
 
 
-	<div class="col-md-4">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
 		<figure>
 			<img class="img-fluid" src="../static/bill.jpg" >
 		</figure>	
 	</div>
-	<div class="col-md-8">
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
 		
 		<p>
 			Theo de Leeuw	
@@ -98,28 +95,29 @@ The Group:
 		</p>
 	</div>
 </div>
-
-
-<br></br>
-{%endblock content1%}
-
-{% block content2 %}
-<h2>The path to Web-Based Network Visualization</h2>
-    <p>
-        Welcome to our web tool for Data Visualisation, this tool is designed for you to upload your
-        data sets and display them in a various amount of views.
-    </p>
-    <p>
-        To get started, go to the <a href="/files">Files</a> page and upload your own file or use one uploaded by your colleages o
-    </p>
-
-<br>
-Enjoy watching video about our project!!
-<br><br>
-<div class="embed-responsive embed-responsive-16by9">
-<iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/nVmXsBNfwHY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
 </div>
+					<div class="col-sm-10 col-md-8 project">
+					
+						<h2>The path to Web-Based Network Visualization</h2>
+						<p>
+						Welcome to our web tool for Data Visualisation, this tool is designed for you to upload your
+						data sets and display them in a various amount of views.
+						</p>
+						<p>
+							To get started, go to the <a href="/files">Files</a> page and upload your own file or use one uploaded by your colleages o
+						</p>
 
-
-{%endblock content2%}
+						<br>
+						Enjoy watching <a href="/">video</a> about our project or reading our <a href="/thesis">thesis</a>!! 
+						<br><br>
+						{% block content4 %}
+				
+						
+						<div class="embed-responsive embed-responsive-16by9">
+						<iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/nVmXsBNfwHY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+						</iframe>
+						</div>
+						{% endblock content4%}
+					</div> 
+				</div> 
+				{% endblock content1%}
