@@ -5,7 +5,7 @@
 	margin : 0;
 	padding : 0;
 	font-family : "Ubuntu", sand-serif;
-	color:#232C31;
+	color:#FFFCFF;
 }
 li, a {
 	font-family : "Ubuntu", sand-serif;
@@ -48,7 +48,7 @@ h1.logo {
 .group{
 		
 	padding: 20px;
-	background-color: #FFBF00;
+	background-color: #F3D250;
 	margin-left:auto;
 	margin-right:auto;
 	box-sizing : border-box;
@@ -58,7 +58,7 @@ h1.logo {
 .project{
 		
 	padding: 20px;
-	background-color: #F6BBB4;
+	background-color: #90CCF4;
 	margin-left:auto;
 	margin-right:auto;
 	text-align:justify;
@@ -107,9 +107,6 @@ footer {
         background-color: #FFBF00;
         padding: 16px;
         display: inline-block;
-		-webkit-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
-		-moz-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
-		box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
 		border-radius:5px;
 		box-sizing: border-box;
     }
@@ -117,7 +114,7 @@ footer {
     .inputfile + label,
     .uploadfile + label:hover
     {
-        background-color: #F6BBB4;
+        background-color: #FFBF00;
         cursor: pointer;
     }
 .img-responsive { 
