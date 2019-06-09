@@ -32,7 +32,10 @@ SEPARATORS = load_obj("sep")
 @app.route('/')
 def index():
     return render_template("index.html", last_file=get_last_file())
-
+	
+@app.route('/thesis')
+def index1():
+    return render_template("index-thesis.html", last_file=get_last_file())
 
 @app.route('/visualization')
 def redirect_to_files():
