@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content1 %}
+<div class="row">
+<div class="col-sm-2 col-md-4 group">
     {% include "file_upload.html" %}
     {% include "file_select.html" %}
+</div>
+<div class="col-sm-10 col-md-8 project">
+    {% include "file_upload_info.html" %}
+</div>
+</div>
 {% endblock content1 %}

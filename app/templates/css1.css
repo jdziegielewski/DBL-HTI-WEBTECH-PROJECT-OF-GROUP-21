@@ -44,35 +44,34 @@ h1.logo {
 .menu li  a:hover{
 	color : #F6BBB4;
 }
-
-.content{
-		min-height: 720px;
-		background-color: #D9DBF1;
-		margin-left:auto;
-		margin-right:auto;
+	
+.group{
 		
-	}	
-	.content1-md-6{
-		min-height: 720px;
-		width:30%;
-		padding: 20px;
-		background-color: #FFBF00;
-		margin-left:auto;
-		margin-right:auto;
-		box-sizing : border-box;
-		float:left;
+	padding: 20px;
+	background-color: #FFBF00;
+	margin-left:auto;
+	margin-right:auto;
+	box-sizing : border-box;
+	float:left;
 
-	}
-	.content2-md-6{
-		min-height: 720px;
-		width:70%;
-		padding: 20px;
-		background-color: #F6BBB4;
-		margin-left:auto;
-		margin-right:auto;
-		text-align:justify;
-		float:right;
-	}
+}
+.project{
+		
+	padding: 20px;
+	background-color: #F6BBB4;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:justify;
+	float:right;
+}
+.files{
+		
+	padding: 20px;
+	background-color: #F6BBB4;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:justify;
+}
 	
 footer {
 	display : flex;

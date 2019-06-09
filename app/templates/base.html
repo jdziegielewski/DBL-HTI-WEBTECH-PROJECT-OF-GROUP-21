@@ -22,21 +22,18 @@
                     <li><a href="/">Project</a></li>
                     <li><a href="/visualization">{{ last_file }}</a></li>
                     <li><a href="/files">Files</a></li>
+                    <li><a href="/documentation?section=general">Documentation</a></li>
                 </ul>
             </nav>
         </header>
 
         <main>
+			<div class="container-fluid">
 
-
-            <div class="content1-md-6">
-                {% block content1 %}
-                {% endblock content1%}
-            </div>
-			<div class="content2-md-6">
-                {% block content2 %}
-                {% endblock content2%}
-            </div> 
+				{% block content1 %}
+				
+				{% endblock content1%}
+			</div> 
 
         
 		</main>
