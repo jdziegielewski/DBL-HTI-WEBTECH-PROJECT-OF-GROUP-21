@@ -1,4 +1,5 @@
-import os
+import os, cloudpickle
+import xlrd
 import numpy as np
 import visualization
 import pandas as pd
@@ -6,24 +7,37 @@ import networkx as nx
 from bokeh.embed import components
 from bokeh.client import pull_session
 from bokeh.embed import server_session
-from flask import Flask, render_template, session, request, redirect, flash
+from flask import Flask, render_template, session, request, redirect, flash, send_from_directory
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
-ALLOWED_EXTENSIONS = ["csv"]
+ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json"]
 
 LAST_FILE = ""
+
+#For saving SEPARATORS
+def save_obj(obj, name):
+    with open('properties/'+ name + '.pkl', 'wb') as file:
+        cloudpickle.dump(obj, file)
+
+def load_obj(name):
+    with open('properties/' + name + '.pkl', 'rb') as file:
+        return cloudpickle.load(file)
+
+SEPARATORS = load_obj("sep")
 
 @app.route('/')
 def index():
     return render_template("index.html", last_file=get_last_file())
-	
+
+
 @app.route('/thesis')
 def index1():
     return render_template("index-thesis.html", last_file=get_last_file())
+
 
 @app.route('/visualization')
 def redirect_to_files():
@@ -57,7 +71,28 @@ def load_local(filename, sep=';', clean=True):
     df.columns = ['start', 'end', 'weight']
     #dg = nx.from_pandas_adjacency(df)
     return df
-
+    #---------------------------------
+    #Didn't know what to do here, below is code from how the df is loaded in bokeh_ap.py - Theo
+    #if SEPARATORS.get(filename) == "excel":
+    #    dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
+    #elif SEPARATORS.get(filename) == "json":
+    #    with open(path) as jsn:
+    #        jsn_dict = json.load(jsn)
+    #    preserved_order = []
+    #    for people in jsn_dict:
+    #        preserved_order.append(people)
+    #    dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
+    #    dataframe = dataframe.reindex(preserved_order)
+    #    clean=True
+    #else:
+    #    dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)
+    #if clean:
+    #    dataframe = dataframe.loc[:, dataframe.columns[1:]]
+    #if dataframe.shape != (len(dataframe), len(dataframe)):
+    #    os.remove("uploads/" + filename)
+    #    print('BAD DATASET')
+    #    dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)
+    #----------------------------------
 
 @app.route("/files", methods=["POST", "GET"])
 def files():
@@ -82,6 +117,13 @@ def files():
 
         destination = "/".join([target, file.filename])
         file.save(destination)
+        if file.filename.rsplit(".", 1)[1].lower() in ["xlsx", "xls", "xlsm"]:
+            SEPARATORS.update({file.filename : "excel"})
+        elif file.filename.rsplit(".", 1)[1].lower() == "json":
+            SEPARATORS.update({file.filename : "json"})
+        else:
+            SEPARATORS.update({file.filename : request.form["sep"]})
+        save_obj(SEPARATORS, "sep")
         flash("File successfully uploaded!", "success")
         return redirect("/files")
 
@@ -90,6 +132,14 @@ def files():
         uploaded_files = os.listdir(target)
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
 
+
+@app.route('/download/<filename>')
+def download(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/documentation')
+def documentation():
+    return render_template('documentation.html', section=request.args.get('section'), last_file=get_last_file())
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS

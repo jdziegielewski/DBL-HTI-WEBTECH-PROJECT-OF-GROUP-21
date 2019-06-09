@@ -1,4 +1,5 @@
-import os
+import os, cloudpickle
+import xlrd, json
 import sys
 import colorcet
 import numpy as np
@@ -45,9 +46,47 @@ def create_ad_matrix_dataset(dataframe):
     dataset = hv.Table(edge_list)
     return dataset
 
+#For saving SEPARATORS
+def save_obj(obj, name):
+    with open('properties/'+ name + '.pkl', 'wb') as file:
+        cloudpickle.dump(obj, file)
+
+def load_obj(name):
+    with open('properties/' + name + '.pkl', 'rb') as file:
+        return cloudpickle.load(file)
+
+SEPARATORS = load_obj("sep")
+
 filename = sys.argv[1]
 path = os.path.join("uploads", filename)
-dataframe = pd.read_csv(path, sep=';', index_col=0)
+#dataframe = pd.read_csv(path, sep=';', index_col=0)
+#dataframe = pd.read_csv(path, sep=None engine='python', index_col=0) # supports , ; : in csv and txt
+#clean=False
+if SEPARATORS.get(filename) == "excel":
+    dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
+elif SEPARATORS.get(filename) == "json":
+    #dataframe = pd.read_json(path) #read_json doesn't cooperate with the json I have
+    #print(dataframe, orient='split', lines=True)
+
+    with open(path) as jsn:
+        jsn_dict = json.load(jsn)
+    preserved_order = []
+    for people in jsn_dict:
+        preserved_order.append(people)
+    dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
+    dataframe = dataframe.reindex(preserved_order)
+else:
+    if SEPARATORS.get(filename) != "":
+        dataframe = pd.read_csv(path, sep=SEPARATORS.get(filename), engine="python", index_col=0)
+    else:
+        dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)
+#if clean:
+#    dataframe = dataframe.loc[:, dataframe.columns[1:]]
+if dataframe.shape != (len(dataframe), len(dataframe)):
+    os.remove(path)
+    print('BAD DATASET')
+    dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)#placeholder, just so it doesnt error
+
 node_link_dataset = create_node_link_dataset(dataframe)
 ad_matrix_dataset = create_ad_matrix_dataset(dataframe)
 tools = ['box_select', 'hover', 'tap']
