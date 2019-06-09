@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content1 %}
+<p><a href="documentation?section=general"><span>General</span></a></p>
+<p><a href="/documentation?section=csv"><span>CSV</span></a></p>
+<p><a href="/documentation?section=txt"><span>TXT</span></p>
+<p><a href="/documentation?section=xl"><span>Excel Sheets</span></p>
+<p><a href="/documentation?section=json"><span>JSON</span></p>
+<p><a href="/documentation?section=edgelist"><span>Edge lists???</span></p>
+{% endblock content1 %}
+
+{% block content2 %}
+{% if section == 'general' %}
+<p>The adjacency matrix format is as follows: blablabla</p>
+{% endif%}
+
+{% if section == 'csv' %}
+<p>Following the adjacency matrix format in CSV is as follows: blablabla</p>
+{% endif%}
+
+{% if section == 'txt' %}
+<p>Following the adjacency matrix format in TXT is as follows: blablabla</p>
+{% endif%}
+
+{% if section == 'xl' %}
+<p>Following the adjacency matrix format in Excel Sheets is as follows: blablabla</p>
+{% endif%}
+
+{% if section == 'json' %}
+<p>Following the adjacency matrix format in JSON is as follows: blablabla</p>
+{% endif%}
+{% endblock content2 %}
