@@ -1,12 +1,9 @@
 from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 import pandas as pd
+import holoviews as hv
 
 def linkage_clustering(dataframe, linkage_type, number_of_clusters):
-    # INPUT
-    number_of_clusters = 3
-    linkage_type = "complete"
-
     # ALGORITHM
     clustering = AgglomerativeClustering(affinity = "precomputed", linkage = linkage_type, n_clusters = number_of_clusters).fit(dataframe)
 
@@ -17,15 +14,37 @@ def linkage_clustering(dataframe, linkage_type, number_of_clusters):
             if clustering.labels_[j] == i:
                 clusters[i].append(j)
 
-    final_clustering = []
+    final_clustering_order = []
     for i in clusters:
-        final_clustering.append(clusters[i])
-    final_clustering = [val for sublist in final_clustering for val in sublist]
+        final_clustering_order.append(clusters[i])
+    final_clustering_order = [val for sublist in final_clustering_order for val in sublist]
 
-    ordered_dataframe = dataframe.copy()
-    for i in range(len(final_clustering)):
-        for j in range(len(final_clustering)):
-            ordered_dataframe.iloc[i,j] = dataframe.iloc[final_clustering[i],final_clustering[j]]
+    index_dataframe = dataframe.index
+    final_clustering = []
+    for i in range(len(index_dataframe)):
+        final_clustering.append(index_dataframe[final_clustering_order[i]])
+
+    #ordered_dataframe = dataframe.copy()
+    #for i in range(len(final_clustering)):
+    #    for j in range(len(final_clustering)):
+    #        ordered_dataframe.iloc[i,j] = dataframe.iloc[final_clustering_order[i],final_clustering_order[j]]
+
+    dataset = create_ad_matrix_dataset(dataframe, final_clustering)
 
     # OUTPUT
-    return ordered_dataframe
+    return dataset
+
+def create_ad_matrix_dataset(dataframe, final_clustering):
+    # df.values[[np.arange(df.shape[0])] * 2] = 0
+    edge_list = dataframe.stack().reset_index()
+    edge_list.columns = ['start', 'end', 'weight']
+
+    edge_list.start = pd.Categorical(edge_list.start, categories = final_clustering)
+    edge_list.end = pd.Categorical(edge_list.end, categories = final_clustering)
+    edge_list.sort_values(["start", "end"], inplace = True)
+
+    edge_list = edge_list.reset_index()
+    edge_list['edge_idx'] = edge_list.index
+
+    dataset = hv.Table(edge_list)
+    return dataset
