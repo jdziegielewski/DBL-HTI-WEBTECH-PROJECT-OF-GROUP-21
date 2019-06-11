@@ -36,6 +36,35 @@ def create_node_link_dataset(dataframe):
     dataset = hv.Table(edge_list)
     return dataset
 
+
+def load_local_adm(path):
+    if SEPARATORS.get(filename) == "excel":
+        dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
+    elif SEPARATORS.get(filename) == "json":
+        #dataframe = pd.read_json(path) #read_json doesn't cooperate with the json I have
+        #print(dataframe, orient='split', lines=True)
+        with open(path) as jsn:
+            jsn_dict = json.load(jsn)
+        preserved_order = []
+        for people in jsn_dict:
+            preserved_order.append(people)
+        dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
+        dataframe = dataframe.reindex(preserved_order)
+    else:
+        if SEPARATORS.get(filename) != "":
+            dataframe = pd.read_csv(path, sep=SEPARATORS.get(filename), engine="c", index_col=0)
+        else:
+            dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)#python engine can infer separators to an extent
+    if 'Unnamed: 0' in dataframe.columns.values:
+        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv)
+        dataframe = dataframe.drop('NaNs', axis=1)
+    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) delete the dataset
+        os.remove(path)
+        #print('BAD DATASET')
+        dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)#placeholder, just so it doesnt error
+    return dataframe
+
+
 def create_ad_matrix_dataset(dataframe):
     # df.values[[np.arange(df.shape[0])] * 2] = 0
     edge_list = dataframe.stack().reset_index()
@@ -59,34 +88,9 @@ SEPARATORS = load_obj("sep")
 
 filename = sys.argv[1]
 path = os.path.join("uploads", filename)
-#dataframe = pd.read_csv(path, sep=';', index_col=0)
 #dataframe = pd.read_csv(path, sep=None engine='python', index_col=0) # supports , ; : in csv and txt
-#clean=False
-if SEPARATORS.get(filename) == "excel":
-    dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
-elif SEPARATORS.get(filename) == "json":
-    #dataframe = pd.read_json(path) #read_json doesn't cooperate with the json I have
-    #print(dataframe, orient='split', lines=True)
 
-    with open(path) as jsn:
-        jsn_dict = json.load(jsn)
-    preserved_order = []
-    for people in jsn_dict:
-        preserved_order.append(people)
-    dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
-    dataframe = dataframe.reindex(preserved_order)
-else:
-    if SEPARATORS.get(filename) != "":
-        dataframe = pd.read_csv(path, sep=SEPARATORS.get(filename), engine="python", index_col=0)
-    else:
-        dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)
-#if clean:
-#    dataframe = dataframe.loc[:, dataframe.columns[1:]]
-if dataframe.shape != (len(dataframe), len(dataframe)):
-    os.remove(path)
-    print('BAD DATASET')
-    dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)#placeholder, just so it doesnt error
-
+dataframe = load_local_adm(path)
 node_link_dataset = create_node_link_dataset(dataframe)
 ad_matrix_dataset = create_ad_matrix_dataset(dataframe)
 tools = ['box_select', 'hover', 'tap']
