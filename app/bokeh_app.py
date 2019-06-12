@@ -1,7 +1,8 @@
-import os
+import os, cloudpickle
+import xlrd, json
 import sys
 import colorcet
-# import numpy as np
+import numpy as np
 import panel as pn
 import param as pm
 import pandas as pd
@@ -18,31 +19,81 @@ from collections import OrderedDict as odict
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
-
-def load_local(filename, sep=';'):
-    path = os.path.join("uploads", filename)
-    df = pd.read_csv(path, sep=sep, index_col=0)
+def create_node_link_dataset(dataframe):
     # df.values[[np.arange(df.shape[0])] * 2] = 0
-    df = df.reset_index()
-    del df['index']
-    df.info()
-    df.columns = [i for i, n in enumerate(df.columns)]
-    #label_dict = {label: idx for idx, label in enumerate(labels)}
-    #print(labels)
-    df = df.stack().reset_index()
-    df = df[df[0] > 0]
-    df.columns = ['start', 'end', 'weight']
-    #df['start'] = df['start'].apply(lambda x: label_dict[x])
-    #df['end'] = df['end'].apply(lambda x: label_dict[x])
-    df = df.reset_index()
-    df['edge_idx'] = df.index
-    df.info()
-    return df
+    edge_list = dataframe.stack().reset_index()
+    edge_list = edge_list[edge_list[0] > 0]
+    edge_list.columns = ['start', 'end', 'weight']
+    edge_list = edge_list.reset_index()
 
+    index_edge_list = np.unique(edge_list[["start", "end"]].values)
+    index_dataframe = dataframe.index
+    if len(index_edge_list) != len(index_dataframe):
+        diff = set(index_dataframe) - set(index_edge_list)
+        for i in diff:
+            edge_list = edge_list.append({"start" : i, "end" : i, "weight" : 0}, ignore_index=True)
+
+    edge_list['edge_idx'] = edge_list.index
+    dataset = hv.Table(edge_list)
+    return dataset
+
+
+def load_local_adm(path):
+    if SEPARATORS.get(filename) == "excel":
+        dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
+    elif SEPARATORS.get(filename) == "json":
+        #dataframe = pd.read_json(path) #read_json doesn't cooperate with the json I have
+        #print(dataframe, orient='split', lines=True)
+        with open(path) as jsn:
+            jsn_dict = json.load(jsn)
+        preserved_order = []
+        for people in jsn_dict:
+            preserved_order.append(people)
+        dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
+        dataframe = dataframe.reindex(preserved_order)
+    else:
+        if SEPARATORS.get(filename) != "":
+            dataframe = pd.read_csv(path, sep=SEPARATORS.get(filename), engine="c", index_col=0)
+        else:
+            dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)#python engine can infer separators to an extent
+    if 'Unnamed: 0' in dataframe.columns.values:
+        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv)
+        dataframe = dataframe.drop('NaNs', axis=1)
+    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) delete the dataset
+        os.remove(path)
+        #print('BAD DATASET')
+        dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)#placeholder, just so it doesnt error
+    return dataframe
+
+
+def create_ad_matrix_dataset(dataframe):
+    # df.values[[np.arange(df.shape[0])] * 2] = 0
+    edge_list = dataframe.stack().reset_index()
+    edge_list.columns = ['start', 'end', 'weight']
+    edge_list = edge_list.reset_index()
+
+    edge_list['edge_idx'] = edge_list.index
+    dataset = hv.Table(edge_list)
+    return dataset
+
+#For saving SEPARATORS
+def save_obj(obj, name):
+    with open('properties/'+ name + '.pkl', 'wb') as file:
+        cloudpickle.dump(obj, file)
+
+def load_obj(name):
+    with open('properties/' + name + '.pkl', 'rb') as file:
+        return cloudpickle.load(file)
+
+SEPARATORS = load_obj("sep")
 
 filename = sys.argv[1]
-dataset = load_local(filename)
-dataset = hv.Table(dataset)
+path = os.path.join("uploads", filename)
+#dataframe = pd.read_csv(path, sep=None engine='python', index_col=0) # supports , ; : in csv and txt
+
+dataframe = load_local_adm(path)
+node_link_dataset = create_node_link_dataset(dataframe)
+ad_matrix_dataset = create_ad_matrix_dataset(dataframe)
 tools = ['box_select', 'hover', 'tap']
 
 cmaps = {'Colorcet -- Fire': colorcet.fire,
@@ -59,7 +110,6 @@ cmaps = {'Colorcet -- Fire': colorcet.fire,
 
 def disable_logo(plot, element):
     plot.state.toolbar.logo = None
-
 
 class NodeLink(pm.Parameterized):
     layout_dict = {'Circular': nx.layout.circular_layout,
@@ -91,7 +141,7 @@ class NodeLink(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
-        self.graph = hv.Graph(dataset, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
+        self.graph = hv.Graph(node_link_dataset, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
         self.bundled_graph = None
         self.edges = None
         self.nodes = None
@@ -124,7 +174,7 @@ class NodeLink(pm.Parameterized):
         if new_graph:
             self.edges = new_graph.edgepaths
             if not self.last_bundle:
-                self.edges = self.edges.add_dimension('weight', 0, dataset.dframe(dimensions=['weight'])['weight'],
+                self.edges = self.edges.add_dimension('weight', 0, node_link_dataset.dframe(dimensions=['weight'])['weight'],
                                                       vdim=True)
             self.nodes = new_graph.nodes
             self.nodes.opts(opts.Nodes(tools=tools))
@@ -177,7 +227,6 @@ class NodeLink(pm.Parameterized):
         #hv_plot.opts(bgcolor=self.param.bg_col)
         return hv_plot
 
-
 class AdMatrix(pm.Parameterized):
     markers = {'Square': 's',
                'Circle': 'o',
@@ -193,9 +242,8 @@ class AdMatrix(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
-        #self.matrix = hv.Points(dataset, kdims=['start', 'end'], vdims=['weight'])
-        #self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
-        self.matrix = hv.HeatMap(dataset, kdims=['start', 'end'], vdims=['weight'])
+        self.matrix = hv.Points(ad_matrix_dataset, kdims=['start', 'end'], vdims=['weight'])
+        self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
         self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
         self.matrix.opts(xaxis=None, yaxis=None, responsive=True, aspect=1, finalize_hooks=[disable_logo])
         self.dyn_matrix = hv.DynamicMap(self.draw_admatrix)
@@ -236,8 +284,8 @@ class AdMatrix(pm.Parameterized):
 
 def modify_doc(doc):
     # dashboard = Dashboard()
-    nodelink = NodeLink(dataset, name='')
-    admatrix = AdMatrix(dataset, name='')
+    nodelink = NodeLink(node_link_dataset, name='')
+    admatrix = AdMatrix(ad_matrix_dataset, name='')
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
     nodelink_view = nodelink.view

@@ -1,4 +1,123 @@
+ <style type="text/css">{% include 'css1.css' %}</style>
+ 
 {% extends "base.html" %}
-{% block content %}
-Landing page text
-{% endblock content %}
+{% block content1 %}
+<div class="row">
+					<div class="col-sm-2 col-md-4 group">
+						The Group:
+<br></br>
+<div class="row">
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
+		<figure>
+			<img class="img-fluid" src="../static/mark.jpg" >
+		</figure>
+	</div>
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
+		<p>
+			David Debnar
+		</p>
+		<p>
+			Scrum Master, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla ut.
+		</p>
+	</div>
+
+
+<br></br>
+
+
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
+		<figure>
+			<img class="img-fluid" src="../static/Jeff.jpg" >
+		</figure>
+	</div>
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
+		<p>
+			Jeroen Oerlemans
+		</p>
+		<p>
+			Visualisation specialist
+		</p>
+	</div>
+
+
+<br></br>
+
+
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
+		<figure>
+			<img class="img-fluid" src="../static/elon.jpg" >
+		</figure>
+	</div>
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
+		<p>
+			Julian Dziegielewski
+		</p>
+		<p>
+			Front-end developer
+		</p>
+		
+	</div>
+
+
+<br></br>
+
+
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
+		<figure>
+			<img class="img-fluid" src="../static/larry.jpg" >
+		</figure>
+	</div>
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
+		<p>
+			Sasha Gielis
+		</p>
+		<p>
+			Data and alghoritms specialist
+		</p>
+	</div>
+
+
+<br></br>
+
+
+	<div class="col-4 col-sm-6 col-md-8 col-lg-4">
+		<figure>
+			<img class="img-fluid" src="../static/theo.jpg" >
+		</figure>	
+	</div>
+	<div class="col-8 col-sm-6 col-md-11 col-lg-8">
+		
+		<p>
+			Theo de Leeuw	
+		</p>
+		<p>
+			Data specialist
+		</p>
+	</div>
+</div>
+</div>
+					<div class="col-sm-10 col-md-8 project">
+					
+						<h2>The path to Web-Based Network Visualization</h2>
+						<p>
+						Welcome to our web tool for Data Visualisation, this tool is designed for you to upload your
+						data sets and display them in a various amount of views.
+						</p>
+						<p>
+							To get started, go to the <a href="/files">Files</a> page and upload your own file or use one uploaded by your colleages o
+						</p>
+
+						<br>
+						Enjoy watching <a href="/">video</a> about our project or reading our <a href="/thesis">thesis</a>!! 
+						<br><br>
+						{% block content4 %}
+				
+						
+						<div class="embed-responsive embed-responsive-16by9">
+						<iframe class="embed-responsive-item" width="560" height="315" src="https://www.youtube.com/embed/nVmXsBNfwHY" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+						</iframe>
+						</div>
+						{% endblock content4%}
+					</div> 
+				</div> 
+				{% endblock content1%}

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content1 %}
+<style type="text/css"> {% include 'css1.css' %} 
+.tab {margin-left: 40px;}
+.tab2 {margin-left: 80px;}
+</style>
+
+<div class="row">
+    <div class="col-sm-2 col-md-4 group">
+        <h1><a href="documentation?section=general"><span>General</span></a></h1>
+        <h1><a href="/documentation?section=csvtxt"><span>CSV/TXT</span></a></h1>
+        <h1><a href="/documentation?section=xl"><span>Excel Sheets</span></a></h1>
+        <h1><a href="/documentation?section=json"><span>JSON</span></a></h1>
+        <h1><a href="/documentation?section=edgelist"><span>Edge lists???</span></a></h1>
+    </div>
+    <div class="col-sm-10 col-md-8 project">
+{% if section == 'general' %}
+<h1>General</h1>
+<p>
+    The adjacency matrix format is a way of describing the relations in a network. 
+    It is an n×n matrix, where n is the number of nodes.</br>
+    The matrix is indexed by the unique node identifier in the columns as well as the rows.</br>
+    The values in the matrix represent the weight of the relations.
+    A weight of zero means that there is no relation.</br></br>
+    The following table depicts the adjacency matrix for a network of 3 nodes, where Node1 is related to Node2 and Node3 (and vice versa).
+
+    <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:hidden;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:hidden;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+        .tg .tg-0pky{border-color:inherit;text-align:center;vertical-align:top}
+    </style>
+    <table class="tg">
+        <tr>
+        <th class="tg-0pky"></th>
+        <th class="tg-0pky">Node1</th>
+        <th class="tg-0pky">Node2</th>
+        <th class="tg-0pky">Node3</th>
+        </tr>
+        <tr>
+        <td class="tg-0pky">Node1</td>
+        <td class="tg-0pky">0</td>
+        <td class="tg-0pky">1</td>
+        <td class="tg-0pky">1</td>
+        </tr>
+        <tr>
+        <td class="tg-0pky">Node2</td>
+        <td class="tg-0pky">1</td>
+        <td class="tg-0pky">0</td>
+        <td class="tg-0pky">0</td>
+        </tr>
+        <tr>
+        <td class="tg-0pky">Node3</td>
+        <td class="tg-0pky">1</td>
+        <td class="tg-0pky">0</td>
+        <td class="tg-0pky">0</td>
+        </tr>
+    </table>
+    </p>
+If you want to know how to follow this format in the various supported file types, navigate to its documentation page on the left.
+</p>
+{% endif%}
+
+{% if section == 'csvtxt' %}
+<h1>CSV/TXT</h1>
+<p>In CSV and TXT format, it is easy to create a file for an adjacency matrix. 
+    You can choose any separator you like.</br>
+    To get a correct result, the first line must start with the separator, followed by the node identifiers separated by the separator.</br>
+    Every line after that should begin with a node identifier, followed by the weights of the relations separated by the separator.</br></br>
+    The adjacency matrix from the <a href="documentation?section=general">general</a> page looks like this in CSV form (using default separator):</br></br>
+
+    ,Node1,Node2,Node3</br>
+    Node1,0,1,1</br>
+    Node2,1,0,0</br>
+    Node3,1,0,0</br>
+
+</p>
+{% endif%}
+
+{% if section == 'xl' %}
+<h1>Excel sheets</h1>
+<p>To get Excel sheets to work with our tool, you just need to make sure that it looks like the table on the <a href="documentation?section=general">general</a> page in your Excel sheet editor.</br>
+    Supported Excel sheet formats are: xls, xlsx, xlsm.
+</p>
+{% endif%}
+
+{% if section == 'json' %}
+<h1>JSON</h1>
+<p>There are multiple ways to save a table in JSON. 
+    To get our tool to work correctly, your JSON file must follow a specific layout.</br>
+    Here is a JSON string of network on the <a href="documentation?section=general">general</a> page:</br></br>
+    <span>{</br>
+        <span class="tab">"Node1": {</br>
+            <span class="tab2">"Node1":0,</span></br>
+            <span class="tab2">"Node2":1,</span></br>
+            <span class="tab2">"Node3":1,</span></br>
+        <span class="tab">},</span></br>
+        <span class="tab">"Node2": {</br>
+            <span class="tab2">"Node1":1,</span></br>
+            <span class="tab2"></span>"Node2":0,</br>
+            <span class="tab2"></span>"Node3":0,</span></br>
+        <span class="tab">},</span></br>
+        <span class="tab">"Node3": {</br>
+            <span class="tab2">"Node1":1,</br>
+            <span class="tab2">"Node2":0,</br>
+            <span class="tab2">"Node3":0,</span></br>
+        <span class="tab">},</span></br>
+    }</br></br>
+    </span>
+    As you can see, this is a series of nested JSONs, with the node names as the key for the JSON describing the outgoing relations of that node.
+</p>
+{% endif%}
+{% if section == 'edgelist' %}
+<h1>Edge lists</h1>
+We currently do not support edge lists.
+{% endif%}
+</div>
+</div>
+{% endblock content1 %}

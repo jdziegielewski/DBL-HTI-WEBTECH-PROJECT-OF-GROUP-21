@@ -5,7 +5,7 @@
 	margin : 0;
 	padding : 0;
 	font-family : "Ubuntu", sand-serif;
-	color:#232C31;
+	color:#FFFCFF;
 }
 li, a {
 	font-family : "Ubuntu", sand-serif;
@@ -31,37 +31,58 @@ h1.logo {
 }
 
 .menu {
-	list-style : none;	
+	list-style : none;
 }
 .menu li {
 	display : inline-block;
 	padding : 0px 20px;
-	
+
 }
 
 .menu li  a {
 	transition : all 0.2s ease 0s;
-	
+
 }
 .menu li  a:hover{
 	color : #F6BBB4;
 }
 
-#content{
-		min-height: 620px;
-		padding: 10px;
-		/* background-color: #D9DBF1; */
-		margin-left:auto;
-		margin-right:auto;
-	}	
+.group{
+
+	padding: 20px;
+	background-color: #F3D250;
+	margin-left:auto;
+	margin-right:auto;
+	box-sizing : border-box;
+	float:left;
+
+}
+.project{
+
+	padding: 20px;
+	background-color: #90CCF4;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:justify;
+	float:right;
+}
+.files{
+
+	padding: 20px;
+	background-color: #F6BBB4;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:justify;
+}
+
 footer {
 	display : flex;
 	justify-content : center;
 	align-items : center;
 	padding : 20px 5%;
 	color:#232C31;
-	list-style : none;	
-	background-color : #232C31
+	list-style : none;
+	clear:both;
 }
 
 
@@ -88,9 +109,6 @@ footer {
         background-color: #FFBF00;
         padding: 16px;
         display: inline-block;
-		-webkit-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
-		-moz-box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
-		box-shadow: 2px 2px 10px 8px rgba(220,243,255,1);
 		border-radius:5px;
 		box-sizing: border-box;
     }
@@ -98,6 +116,9 @@ footer {
     .inputfile + label,
     .uploadfile + label:hover
     {
-        background-color: #F6BBB4;
+        background-color: #FFBF00;
         cursor: pointer;
     }
+.img-responsive {
+    width:100%;
+}
