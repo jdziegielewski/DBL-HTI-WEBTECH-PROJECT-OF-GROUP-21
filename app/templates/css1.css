@@ -5,7 +5,7 @@
 	margin : 0;
 	padding : 0;
 	font-family : "Ubuntu", sand-serif;
-	color:#FFFCFF;
+/*	color:#FFFCFF;*/
 }
 li, a {
 	font-family : "Ubuntu", sand-serif;
@@ -19,6 +19,8 @@ header {
 	justify-content : flex-end;
 	align-items : center;
 	padding : 25px 3%;
+	background-color : #232C31;
+
 }
 h1.logo {
 	font-family : "Ubuntu", sand-serif;
@@ -29,24 +31,24 @@ h1.logo {
 }
 
 .menu {
-	list-style : none;	
+	list-style : none;
 }
 .menu li {
 	display : inline-block;
 	padding : 0px 20px;
-	
+
 }
 
 .menu li  a {
 	transition : all 0.2s ease 0s;
-	
+
 }
 .menu li  a:hover{
 	color : #F6BBB4;
 }
-	
+
 .group{
-		
+
 	padding: 20px;
 	background-color: #F3D250;
 	margin-left:auto;
@@ -56,7 +58,7 @@ h1.logo {
 
 }
 .project{
-		
+
 	padding: 20px;
 	background-color: #90CCF4;
 	margin-left:auto;
@@ -65,14 +67,14 @@ h1.logo {
 	float:right;
 }
 .files{
-		
+
 	padding: 20px;
 	background-color: #F6BBB4;
 	margin-left:auto;
 	margin-right:auto;
 	text-align:justify;
 }
-	
+
 footer {
 	display : flex;
 	justify-content : center;
@@ -117,6 +119,6 @@ footer {
         background-color: #FFBF00;
         cursor: pointer;
     }
-.img-responsive { 
+.img-responsive {
     width:100%;
 }
