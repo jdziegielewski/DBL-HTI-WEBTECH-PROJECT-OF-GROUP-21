@@ -1,13 +1,14 @@
 import os, shutil, cloudpickle
 import xlrd
 import numpy as np
+import time
 # import visualization
 import pandas as pd
 import networkx as nx
 from bokeh.embed import components
 from bokeh.client import pull_session
 from bokeh.embed import server_session
-from flask import Flask, render_template, session, request, redirect, flash, send_from_directory
+from flask import Flask, render_template, session, request, redirect, flash, send_from_directory, send_file, make_response
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
@@ -74,7 +75,7 @@ def load_local(filename):#, sep=';'):
 
 def store_local(filename, sep=None):
     #---------------------------------
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join('temp', filename)
     if sep == "excel":
         dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
     elif sep == "json":
@@ -121,13 +122,13 @@ def files():
             flash("File has wrong extension, please upload a supported filetype", "error")
             return redirect("/files")
 
-        target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
+        target = os.path.join(APP_ROOT, 'temp')
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        #destination = "/".join([target, file.filename])
-        #file.save(destination)
-        
+        destination = "/".join([target, file.filename])
+        file.save(destination)
+    
         if file.filename.rsplit(".", 1)[1].lower() in ["xlsx", "xls", "xlsm"]:
             SEPARATOR = "excel"
         elif file.filename.rsplit(".", 1)[1].lower() == "json":
@@ -148,12 +149,18 @@ def files():
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
 
 
-@app.route('/download/<filename>')
-def download(filename):
+@app.route('/download')
+def download():
+    filename = request.args.get("file")
     df = load_obj(filename)
-    dlpath = os.path.join('temp', 'Download.csv')
-    file = df.to_csv(dlpath)
-    return send_from_directory('temp', 'Download.csv')
+    #file = df.to_csv(os.path.join(APP_ROOT, "temp", filename + ".csv"))
+    #response = make_response(file)
+    #response.headers['Content-Disposition'] = "attachment: filename="+filename+".csv"
+    #return response
+    resp = make_response(df.to_csv(encoding='utf-8'))
+    resp.headers["Content-Disposition"] = "attachment; filename="+filename+".csv"
+    resp.headers["Content-Type"] = "text/csv"
+    return resp
 
 @app.route('/documentation')
 def documentation():
