@@ -13,7 +13,8 @@ def create_sidebar(node_link_dataset, ad_matrix_dataset, dataframe):
 
     exploration = pn.Column('#Explore',
                             nodelink.param.layout,
-                            admatrix.param.layout, width=250)
+                            #admatrix.param.layout,
+                            width=250)
 
     edge_settings = pn.Column(nodelink.param.edge_col,
                               nodelink.param.edge_alpha,

@@ -23,8 +23,10 @@ cmaps = {'Colorcet -- Fire': colorcet.fire,
          'Solid -- Red': ['red'],
          'Solid -- White': ['white']}
 
+
 def disable_logo(plot, element):
     plot.state.toolbar.logo = None
+
 
 class AdMatrix(pm.Parameterized):
     layout = pm.Selector(label='Matrix Ordering', objects=['None', 'Clustering'], default='None')
@@ -47,7 +49,7 @@ class AdMatrix(pm.Parameterized):
         self.matrix.redim(weight=dict(range=(0.1, 10)))
         self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
         self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
-        self.matrix.opts(xaxis=None, yaxis=None, responsive=True, aspect=1, finalize_hooks=[disable_logo])
+        self.matrix.opts(responsive=True, aspect=1, finalize_hooks=[disable_logo])
         self.dyn_matrix = hv.DynamicMap(self.draw_admatrix)
         self.edge_stream = Selection1D(source=self.dyn_matrix)
         self.nodelink = None
@@ -66,7 +68,7 @@ class AdMatrix(pm.Parameterized):
                 self.matrix = hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])
             self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
             self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
-            self.matrix.opts(xaxis=None, yaxis=None, responsive=True, aspect=1, finalize_hooks=[disable_logo])
+            self.matrix.opts(responsive=True, aspect=1, finalize_hooks=[disable_logo])
 
     @pm.depends('edge_col', 'size', 'alpha', 'nons_alpha', 'marker', 'layout')
     def draw_admatrix(self):
