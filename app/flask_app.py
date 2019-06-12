@@ -14,7 +14,7 @@ app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
-ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json"]
+ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json", "zip", "gz", "xz", "bz2"]
 
 LAST_FILE = ""
 
@@ -108,7 +108,7 @@ def files():
             return redirect("/files")
         
         if not allowed_file(file.filename):
-            flash("File has wrong extension, please upload a .csv file", "error")
+            flash("File has wrong extension, please upload a supported filetype", "error")
             return redirect("/files")
 
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
