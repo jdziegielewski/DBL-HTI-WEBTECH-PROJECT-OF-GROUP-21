@@ -11,8 +11,7 @@ def sorted(df):
 
 
 def linkage_clustering(df, linkage_type, number_of_clusters):
-    # ALGORITHM
-    clustering = AgglomerativeClustering(affinity="euclidean", linkage=linkage_type, n_clusters=number_of_clusters)\
+    clustering = AgglomerativeClustering(affinity="precomputed", linkage=linkage_type, n_clusters=number_of_clusters)\
         .fit(df)
 
     clusters = {}
