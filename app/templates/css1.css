@@ -19,7 +19,7 @@ header {
 	justify-content : flex-end;
 	align-items : center;
 	padding : 25px 3%;
-	background-color : #232C31;
+	background-color : #002642;
 
 }
 h1.logo {
@@ -50,7 +50,7 @@ h1.logo {
 .group{
 
 	padding: 20px;
-	background-color: #F3D250;
+	background-color: #FFD045;
 	margin-left:auto;
 	margin-right:auto;
 	box-sizing : border-box;
@@ -60,7 +60,7 @@ h1.logo {
 .project{
 
 	padding: 20px;
-	background-color: #90CCF4;
+	background-color: #FFFCFF;
 	margin-left:auto;
 	margin-right:auto;
 	text-align:justify;
@@ -80,9 +80,10 @@ footer {
 	justify-content : center;
 	align-items : center;
 	padding : 20px 5%;
-	color:#232C31;
+	color:#002642;
 	list-style : none;
 	clear:both;
+	background-color : #002642;
 }
 
 

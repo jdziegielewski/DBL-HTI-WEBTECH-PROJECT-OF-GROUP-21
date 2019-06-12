@@ -1,7 +1,60 @@
 <div id="uploadInfo"  align="center">
-    <h1>Upload information</h1>
+    <h1>Upload information</h1></br>
     <p>Accepted file extensions: csv, txt, xlsx, xls, xlsm, json.</p>
     <p>We are expecting an <a href="/documentation?section=general">adjacency matrix format</a>.</p>
     <p>Default accepted separators (csv, txt): semicolon, colon, comma.</p>
     <p>If you want to use a custom separator, enter it in the textbox before pressing 'Upload'.</p>
+    <p>Below you can see the various supported file types and functions.</br></br></p>
+    <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+        .tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+        .tg .tg-0lax{text-align:left;vertical-align:top}
+        </style>
+        <table class="tg">
+          <tr>
+            <th class="tg-0pky">File type</th>
+            <th class="tg-0pky">Tool support</th>
+            <th class="tg-0pky">Custom separators</th>
+            <th class="tg-0pky">Decrompression support</th>
+          </tr>
+          <tr>
+            <td class="tg-0pky"><a href="/documentation?section=csvtxt">CSV</a></td>
+            <td class="tg-0pky">Yes</td>
+            <td class="tg-0pky">Yes</td>
+            <td class="tg-0pky">Yes</td>
+          </tr>
+          <tr>
+            <td class="tg-0pky"><a href="/documentation?section=csvtxt">TXT</a></td>
+            <td class="tg-0pky">Yes</td>
+            <td class="tg-0pky">Yes</td>
+            <td class="tg-0pky">Yes</td>
+          </tr>
+          <tr>
+            <td class="tg-0pky"><a href="/documentation?section=xl">XLSX</a></td>
+            <td class="tg-0pky">Yes</td>
+            <td class="tg-0pky">No</td>
+            <td class="tg-0pky">No</td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><a href="/documentation?section=xl">XLS</a></td>
+            <td class="tg-0lax">Yes</td>
+            <td class="tg-0lax">No</td>
+            <td class="tg-0lax">No</td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><a href="/documentation?section=xl">XLSM</a></td>
+            <td class="tg-0lax">Yes</td>
+            <td class="tg-0lax">No</td>
+            <td class="tg-0lax">No</td>
+          </tr>
+          <tr>
+            <td class="tg-0lax"><a href="/documentation?section=json">JSON</a></td>
+            <td class="tg-0lax">Yes</td>
+            <td class="tg-0lax">No</td>
+            <td class="tg-0lax">No</td>
+          </tr>
+        </table></br></br>
+        <p>Please note that due to the way the datasets are stored on the server, upon downloading you will only get files in the CSV format.</p>
 </div>
