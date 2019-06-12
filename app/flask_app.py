@@ -1,4 +1,4 @@
-import os, cloudpickle
+import os, shutil, cloudpickle
 import xlrd
 import numpy as np
 # import visualization
@@ -20,14 +20,12 @@ LAST_FILE = ""
 
 #For saving SEPARATORS
 def save_obj(obj, name):
-    with open('properties/'+ name + '.pkl', 'wb') as file:
+    with open('uploads/'+ name + '.pkl', 'wb') as file:
         cloudpickle.dump(obj, file)
 
 def load_obj(name):
-    with open('properties/' + name + '.pkl', 'rb') as file:
+    with open('uploads/' + name + '.pkl', 'rb') as file:
         return cloudpickle.load(file)
-
-SEPARATORS = load_obj("sep")
 
 @app.route('/')
 def index():
@@ -63,35 +61,47 @@ def close_file():
     return redirect('/files')
 
 
-def load_local(filename, sep=';', clean=True):
-    path = os.path.join(UPLOAD_FOLDER, filename)
-    df = pd.read_csv(path, sep=sep, index_col=0)
-    df = df.stack().reset_index()
-    df = df[df[0] > 0]
-    df.columns = ['start', 'end', 'weight']
-    #dg = nx.from_pandas_adjacency(df)
-    return df
+def load_local(filename):#, sep=';'):
+    #path = os.path.join(UPLOAD_FOLDER, filename)
+    #dataframe = pd.read_csv(path, sep=sep, index_col=0)
+    #dataframe = dataframe.stack().reset_index()
+    #dataframe = dataframe[dataframe[0] > 0]
+    #dataframe.columns = ['start', 'end', 'weight']
+    #dg = nx.from_pandas_adjacency(dataframe)
+    #return dataframe
+    load_obj(filename)
+
+
+def store_local(filename, sep=None):
     #---------------------------------
-    #Didn't know what to do here, below is code from how the df is loaded in bokeh_ap.py - Theo
-    #if SEPARATORS.get(filename) == "excel":
-    #    dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
-    #elif SEPARATORS.get(filename) == "json":
-    #    with open(path) as jsn:
-    #        jsn_dict = json.load(jsn)
-    #    preserved_order = []
-    #    for people in jsn_dict:
-    #        preserved_order.append(people)
-    #    dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
-    #    dataframe = dataframe.reindex(preserved_order)
-    #    clean=True
-    #else:
-    #    dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)
-    #if clean:
-    #    dataframe = dataframe.loc[:, dataframe.columns[1:]]
-    #if dataframe.shape != (len(dataframe), len(dataframe)):
-    #    os.remove("uploads/" + filename)
-    #    print('BAD DATASET')
-    #    dataframe = pd.read_csv('uploads/Test_data.csv', sep=';', index_col=0)
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    if sep == "excel":
+        dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
+    elif sep == "json":
+        #dataframe = pd.read_json(path) #read_json doesn't cooperate with the json I have
+        with open(path) as jsn:
+            jsn_dict = json.load(jsn)
+        preserved_order = []
+        for people in jsn_dict:
+            preserved_order.append(people)
+        dataframe = pd.DataFrame.from_dict(jsn_dict, orient='index')
+        dataframe = dataframe.reindex(preserved_order)
+    else:
+        if sep != "":
+            dataframe = pd.read_csv(path, sep=sep, engine="c", index_col=0)
+        else:
+            dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)#python engine can infer separators to an extent
+    
+    if 'Unnamed: 0' in dataframe.columns.values:
+        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv)
+        dataframe = dataframe.drop('NaNs', axis=1)
+    
+    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) delete the dataset
+        os.remove(path)
+        flash("Uploaded file is not an adjacency matrix", "error")
+        return redirect("/files")
+    
+    return dataframe
     #----------------------------------
 
 @app.route("/files", methods=["POST", "GET"])
@@ -115,27 +125,35 @@ def files():
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        destination = "/".join([target, file.filename])
-        file.save(destination)
+        #destination = "/".join([target, file.filename])
+        #file.save(destination)
+        
         if file.filename.rsplit(".", 1)[1].lower() in ["xlsx", "xls", "xlsm"]:
-            SEPARATORS.update({file.filename : "excel"})
+            SEPARATOR = "excel"
         elif file.filename.rsplit(".", 1)[1].lower() == "json":
-            SEPARATORS.update({file.filename : "json"})
+            SEPARATOR = "json"
         else:
-            SEPARATORS.update({file.filename : request.form["sep"]})
-        save_obj(SEPARATORS, "sep")
+            SEPARATOR = request.form["sep"]
+        save_obj(store_local(file.filename, sep=SEPARATOR), file.filename)
         flash("File successfully uploaded!", "success")
         return redirect("/files")
 
     else:
+        shutil.rmtree('temp')
+        os.mkdir('temp')
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
         uploaded_files = os.listdir(target)
+        for i in range(len(uploaded_files)):
+            uploaded_files[i] = uploaded_files[i].replace('.pkl', '')
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
 
 
 @app.route('/download/<filename>')
 def download(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    df = load_obj(filename)
+    dlpath = os.path.join('temp', 'Download.csv')
+    file = df.to_csv(dlpath)
+    return send_from_directory('temp', 'Download.csv')
 
 @app.route('/documentation')
 def documentation():
