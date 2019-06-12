@@ -17,3 +17,16 @@ Virtual Environment
 	- "pip install -r requirements.txt" to install required libraries (~400mb) to the virtual environment
 	
 	Now you can use activate.bat or deactivate.bat (in webtech-env\Scripts\) from a prompt to toggle the environment
+
+Launch
+------
+
+	- python app/flask_app.py
+	- python app/bokeh_app.py filename
+		(filename must be one of uplaoded datasets)
+
+
+Use
+---
+
+	- Documentation is included on the website.

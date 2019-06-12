@@ -149,6 +149,6 @@ class NodeLink(pm.Parameterized):
             .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo]) \
             * self.dyn_nodes \
             * dynspread(datashade(self.dyn_node_select, cmap=self.param.nsel_col, alpha=self.param.nsel_alpha, precompute=True), max_px=100) \
-            #* dynspread(datashade(self.dyn_edge_select, cmap=self.param.esel_col, alpha=self.param.esel_alpha, precompute=True), max_px=100)
+            * dynspread(datashade(self.dyn_edge_select, cmap=self.param.esel_col, alpha=self.param.esel_alpha, precompute=True), max_px=100)
         #hv_plot.opts(bgcolor=self.param.bg_col)
         return hv_plot

@@ -29,7 +29,7 @@ def disable_logo(plot, element):
 
 
 class AdMatrix(pm.Parameterized):
-    layout = pm.Selector(label='Matrix Ordering', objects=['None', 'Clustering'], default='None')
+    layout = pm.Selector(label='Matrix Ordering', objects=['Sorted', 'Clustering'], default='Sorted')
     markers = {'Square': 's',
                'Circle': 'o',
                'Cross': '+'}
@@ -40,12 +40,15 @@ class AdMatrix(pm.Parameterized):
     size = pm.Number(label='Size', default=5, bounds=(1, 10))
     esel_col = pm.Selector(label='Node Selection Color', objects=cmaps, default=['green'])
     esel_alpha = pm.Magnitude(label='Node Selection Alpha', default=0.7)
+    cluster_count = pm.Integer(label='Number of clusters', default=1)
 
-    def __init__(self, data, dataframe, **params):
+    def __init__(self, data, dataframe, ordering, **params):
         super().__init__(**params)
         self.dataset = data
         self.dataframe = dataframe
-        self.matrix = hv.Points(data, kdims=['start', 'end'], vdims=['weight'])
+        self.ordering = linkage_clustering_algorithm.sorted(dataframe)
+        self.dyn_order = hv.Points(self.ordering, kdims=['x', 'y'], vdims=['z']).opts(alpha=0)
+        self.matrix = hv.Points(data, kdims=['start', 'end'], vdims=['start', 'end', 'weight'])
         self.matrix.redim(weight=dict(range=(0.1, 10)))
         self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
         self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
@@ -62,15 +65,21 @@ class AdMatrix(pm.Parameterized):
         if self.last_layout is not self.layout:
             self.last_layout = self.layout
             if self.last_layout is 'Clustering':
-                new_data = linkage_clustering_algorithm.linkage_clustering(self.dataframe, "ward", 3)
-                self.matrix = hv.Points(new_data, kdims=['start', 'end'], vdims=['weight'])
+                self.ordering = linkage_clustering_algorithm.linkage_clustering(self.dataframe, "ward", 3)
+                self.dyn_order = hv.Points(self.ordering, kdims=['x', 'y'], vdims=['z']).opts(alpha=0, nonselection_alpha=0)
             else:
-                self.matrix = hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])
+                self.ordering = linkage_clustering_algorithm.sorted(self.dataframe)
+                self.dyn_order = hv.Points(self.ordering, kdims=['x', 'y'], vdims=['z']).opts(alpha=0, nonselection_alpha=0)
             self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
             self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
             self.matrix.opts(responsive=True, aspect=1, finalize_hooks=[disable_logo])
 
-    @pm.depends('edge_col', 'size', 'alpha', 'nons_alpha', 'marker', 'layout')
+    @pm.depends('layout')
+    def draw_ordering(self):
+        self.update_layout()
+        return self.dyn_order
+
+    @pm.depends('edge_col', 'size', 'alpha', 'nons_alpha', 'marker')
     def draw_admatrix(self):
         self.update_layout()
         self.matrix.opts(opts.Points(size=self.size, alpha=self.alpha, nonselection_alpha=self.nons_alpha,
@@ -90,7 +99,8 @@ class AdMatrix(pm.Parameterized):
         #return dynspread(datashade(hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])))
         # return dynspread(datashade(hv.HeatMap(self.dataset, kdims=['start', 'end'], vdims=['weight']).opts(colorbar=True)))\
             # .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo])\
-        return self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
+        #return self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
+        return hv.DynamicMap(self.draw_ordering) * self.dyn_matrix
 
     def test_trigger(self, value):
         print(value)

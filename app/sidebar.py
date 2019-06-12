@@ -3,9 +3,9 @@ from nodelink import NodeLink
 from admatrix import AdMatrix
 
 
-def create_sidebar(node_link_dataset, ad_matrix_dataset, dataframe):
+def create_sidebar(node_link_dataset, ad_matrix_dataset, dataframe, ordering):
     nodelink = NodeLink(node_link_dataset)
-    admatrix = AdMatrix(ad_matrix_dataset, dataframe)
+    admatrix = AdMatrix(ad_matrix_dataset, dataframe, ordering)
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
     nodelink_view = nodelink.view
@@ -13,7 +13,7 @@ def create_sidebar(node_link_dataset, ad_matrix_dataset, dataframe):
 
     exploration = pn.Column('#Explore',
                             nodelink.param.layout,
-                            #admatrix.param.layout,
+                            admatrix.param.layout,
                             width=250)
 
     edge_settings = pn.Column(nodelink.param.edge_col,
