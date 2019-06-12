@@ -19,6 +19,8 @@ header {
 	justify-content : flex-end;
 	align-items : center;
 	padding : 25px 3%;
+	background-color : #232C31;
+
 }
 h1.logo {
 	font-family : "Ubuntu", sand-serif;
@@ -48,7 +50,7 @@ h1.logo {
 #content{
 		min-height: 620px;
 		padding: 10px;
-		background-color: #D9DBF1;
+		/* background-color: #D9DBF1; */
 		margin-left:auto;
 		margin-right:auto;
 	}	
@@ -59,7 +61,7 @@ footer {
 	padding : 20px 5%;
 	color:#232C31;
 	list-style : none;	
-	
+	background-color : #232C31
 }
 
 
@@ -99,4 +101,3 @@ footer {
         background-color: #F6BBB4;
         cursor: pointer;
     }
-

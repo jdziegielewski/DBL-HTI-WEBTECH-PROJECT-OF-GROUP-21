@@ -13,6 +13,7 @@ from holoviews.streams import Selection1D, Params
 from holoviews.element.graphs import layout_nodes
 from holoviews.operation.datashader import rasterize, datashade, bundle_graph, dynspread, shade
 from bokeh.server.server import Server
+from holoviews.operation import decimate
 from collections import OrderedDict as odict
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
@@ -22,11 +23,20 @@ def load_local(filename, sep=';'):
     path = os.path.join("uploads", filename)
     df = pd.read_csv(path, sep=sep, index_col=0)
     # df.values[[np.arange(df.shape[0])] * 2] = 0
+    df = df.reset_index()
+    del df['index']
+    df.info()
+    df.columns = [i for i, n in enumerate(df.columns)]
+    #label_dict = {label: idx for idx, label in enumerate(labels)}
+    #print(labels)
     df = df.stack().reset_index()
     df = df[df[0] > 0]
     df.columns = ['start', 'end', 'weight']
+    #df['start'] = df['start'].apply(lambda x: label_dict[x])
+    #df['end'] = df['end'].apply(lambda x: label_dict[x])
     df = df.reset_index()
     df['edge_idx'] = df.index
+    df.info()
     return df
 
 
@@ -75,6 +85,8 @@ class NodeLink(pm.Parameterized):
     bg_col = pm.Color(label='Background Color', default='#ffffff')
 
     bundle = pm.Boolean(label='Edge Bundling', default=False)
+    edge_bundle = pm.Selector(label='Edge Bundling', objects=['Off', 'On'])
+    rendering_method = pm.Selector(label='Rendering Method', objects=['Interactive', 'Datashaded'])
 
     def __init__(self, data, **params):
         super().__init__(**params)
@@ -91,6 +103,7 @@ class NodeLink(pm.Parameterized):
         self.dyn_node_select = hv.DynamicMap(self.draw_node_select, streams=[self.node_stream])
         self.dyn_edge_select = None
         self.admatrix = None
+        self.jobs = None
 
     def link_admatrix(self, admatrix):
         self.admatrix = admatrix
@@ -119,7 +132,7 @@ class NodeLink(pm.Parameterized):
     def get_graph(self):
         return self.bundled_graph if self.bundle else self.graph
 
-    @pn.depends('layout', 'edge_col', 'bundle')
+    @pn.depends('layout', 'edge_col', 'bundle', 'rendering_method')
     def draw_edges(self):
         self.update_layout()
         return self.edges
@@ -148,15 +161,19 @@ class NodeLink(pm.Parameterized):
         else:
             return self.get_graph().select(edge_idx=index)
 
-    def start(self):
-        dyn_edges = datashade(self.dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha)
+    @pn.depends('rendering_method')
+    def view(self):
+        dyn_edges = self.dyn_edges
+        if self.rendering_method == 'Datashaded':
+            dyn_edges = datashade(self.dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha, precompute=True)
+
         self.dyn_edge_select = hv.DynamicMap(self.draw_edge_select, streams=[self.admatrix.edge_stream])
         hv_plot = \
             dyn_edges \
             .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo]) \
             * self.dyn_nodes \
-            * dynspread(datashade(self.dyn_node_select, cmap=self.param.nsel_col, alpha=self.param.nsel_alpha), max_px=100) \
-            * dynspread(datashade(self.dyn_edge_select, cmap=self.param.esel_col, alpha=self.param.esel_alpha), max_px=100)
+            * dynspread(datashade(self.dyn_node_select, cmap=self.param.nsel_col, alpha=self.param.nsel_alpha, precompute=True), max_px=100) \
+            * dynspread(datashade(self.dyn_edge_select, cmap=self.param.esel_col, alpha=self.param.esel_alpha, precompute=True), max_px=100)
         #hv_plot.opts(bgcolor=self.param.bg_col)
         return hv_plot
 
@@ -176,8 +193,9 @@ class AdMatrix(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
-        self.matrix = hv.Points(dataset, kdims=['start', 'end'], vdims=['weight'])
-        self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
+        #self.matrix = hv.Points(dataset, kdims=['start', 'end'], vdims=['weight'])
+        #self.matrix.opts(opts.Points(tools=tools, toolbar='above'))
+        self.matrix = hv.HeatMap(dataset, kdims=['start', 'end'], vdims=['weight'])
         self.matrix.opts(xrotation=90, xaxis='top', labelled=[], color='weight', colorbar=True)
         self.matrix.opts(xaxis=None, yaxis=None, responsive=True, aspect=1, finalize_hooks=[disable_logo])
         self.dyn_matrix = hv.DynamicMap(self.draw_admatrix)
@@ -189,7 +207,9 @@ class AdMatrix(pm.Parameterized):
 
     @pm.depends('edge_col', 'size', 'alpha', 'nons_alpha', 'marker')
     def draw_admatrix(self):
-        self.matrix.opts(opts.Points(size=self.size, alpha=self.alpha, nonselection_alpha=self.nons_alpha, marker=self.marker, color='weight')).opts(cmap=self.edge_col)
+        #self.matrix.opts(opts.Points(size=self.size, alpha=self.alpha, nonselection_alpha=self.nons_alpha, marker=self.marker, color='weight')).opts(cmap=self.edge_col)
+        self.matrix.opts(opts.HeatMap(alpha=self.alpha))
+        self.matrix.opts(cmap=self.edge_col)
         return self.matrix
 
     @pm.depends('esel_col', 'esel_alpha')
@@ -201,7 +221,13 @@ class AdMatrix(pm.Parameterized):
             return self.matrix.select(start=starts.tolist()).opts(opts.Points(alpha=self.esel_alpha, color='weight')).opts(cmap=self.esel_col)
 
     def start(self):
-        return self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
+        #return dynspread(datashade(hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])))
+        return dynspread(datashade(hv.HeatMap(self.dataset, kdims=['start', 'end'], vdims=['weight']).opts(colorbar=True)))\
+            .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo])\
+        #return self.dyn_matrix #* hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
+
+    def test_trigger(self, value):
+        print(value)
 
 
 # class Dashboard(pm.Parameterized):
@@ -214,16 +240,68 @@ def modify_doc(doc):
     admatrix = AdMatrix(dataset, name='')
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
-    view1 = nodelink.start()
-    view2 = admatrix.start()
-    tabs = pn.Tabs()
-    tabs.append(("Node-Link", pn.Param(nodelink.param)))
-    tabs.append(("Adjacency Matrix", pn.Param(admatrix.param)))
-    panel = pn.Row(pn.Column(tabs), view1, view2)
+    nodelink_view = nodelink.view
+    admatrix_view = admatrix.start
+
+    exploration = pn.Column('#Exploration',
+                            nodelink.param.layout)
+
+    edge_settings = pn.Column(nodelink.param.edge_col,
+                              nodelink.param.edge_alpha,
+                              nodelink.param.esel_col,
+                              nodelink.param.esel_alpha,
+                              nodelink.param.bundle,
+                              nodelink.param.rendering_method)
+
+    node_settings = pn.Column(nodelink.param.node_size,
+                              nodelink.param.node_col,
+                              nodelink.param.line_col,
+                              nodelink.param.node_alpha,
+                              nodelink.param.nsel_col,
+                              nodelink.param.nsel_alpha)
+
+    matrix_settings = pn.Column(admatrix.param.size,
+                                admatrix.param.marker,
+                                admatrix.param.edge_col,
+                                admatrix.param.alpha,
+                                admatrix.param.nons_alpha,
+                                admatrix.param.esel_col,
+                                admatrix.param.esel_alpha)
+
+    customization_tabs = pn.Tabs(('Edges', edge_settings),
+                                 ('Nodes', node_settings),
+                                 ('Matrix', matrix_settings),
+                                 tabs_location='left')
+
+    customization = pn.Column('#Customization',
+                              customization_tabs)
+
+    sidebar = pn.Column(exploration, customization)
+
+    panel = pn.Row(sidebar, nodelink_view, admatrix_view)
+
     return panel.server_doc(doc=doc)
+
+    #col1 = pn.Row(pn.Param(nodelink.param, widgets={'rendering_method': pn.widgets.RadioButtonGroup}),  height=100, background='#f0f0f0')
+
+    # gspec = pn.GridSpec(sizing_mode='stretch_both')
+    # gspec[0, :5] = tabs
+    # gspec[1:5, :5] = main_row
+
+    # panel = main_row  pn.Column(col1, main_row) #pn.Column(, main_row)
+
+    #slider = pn.widgets.FloatSlider(name='Test Slider', start=0, end=10, step=0.2, value=3)
+    #slider.param.watch(admatrix.test_trigger, 'value')
+    #slider.param.trigger('value')
+
+    #toggle = pn.widgets.Toggle(name='Datashade', button_type='primary', value=False)
+    #toggle.param.watch(nodelink.callback, 'value')
+
+    #c.append(pn.pane.Markdown(object='Layout'))
+    #nodelink.addd(c)
 
 
 server = Server({'/': modify_doc}, port=5006, allow_websocket_origin=['*'])
 server.start()
-server.show('/')
+#server.show('/')
 server.run_until_shutdown()
