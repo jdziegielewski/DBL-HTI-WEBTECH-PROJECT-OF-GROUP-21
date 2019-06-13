@@ -1,5 +1,5 @@
 import os, shutil, cloudpickle
-import xlrd
+import xlrd, json
 import numpy as np
 import time
 # import visualization
@@ -8,7 +8,7 @@ import networkx as nx
 from bokeh.embed import components
 from bokeh.client import pull_session
 from bokeh.embed import server_session
-from flask import Flask, render_template, session, request, redirect, flash, send_from_directory, send_file, make_response
+from flask import Flask, render_template, session, request, redirect, flash, send_file
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
@@ -62,15 +62,15 @@ def close_file():
     return redirect('/files')
 
 
-def load_local(filename):#, sep=';'):
-    #path = os.path.join(UPLOAD_FOLDER, filename)
-    #dataframe = pd.read_csv(path, sep=sep, index_col=0)
-    #dataframe = dataframe.stack().reset_index()
-    #dataframe = dataframe[dataframe[0] > 0]
-    #dataframe.columns = ['start', 'end', 'weight']
+def load_local(filename, sep=';'):
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    dataframe = pd.read_csv(path, sep=sep, index_col=0)
+    dataframe = dataframe.stack().reset_index()
+    dataframe = dataframe[dataframe[0] > 0]
+    dataframe.columns = ['start', 'end', 'weight']
     #dg = nx.from_pandas_adjacency(dataframe)
-    #return dataframe
-    load_obj(filename)
+    return dataframe
+    #load_obj(filename) # <- this function replaces this ^ function
 
 
 def store_local(filename, sep=None):
@@ -121,7 +121,7 @@ def files():
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a supported filetype", "error")
             return redirect("/files")
-
+    # v preprocess? v
         target = os.path.join(APP_ROOT, 'temp')
         if not os.path.isdir(target):
             os.mkdir(target)
@@ -147,20 +147,17 @@ def files():
         for i in range(len(uploaded_files)):
             uploaded_files[i] = uploaded_files[i].replace('.pkl', '')
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
-
+    # ^             ^
 
 @app.route('/download')
 def download():
     filename = request.args.get("file")
     df = load_obj(filename)
-    #file = df.to_csv(os.path.join(APP_ROOT, "temp", filename + ".csv"))
-    #response = make_response(file)
-    #response.headers['Content-Disposition'] = "attachment: filename="+filename+".csv"
-    #return response
-    resp = make_response(df.to_csv(encoding='utf-8'))
-    resp.headers["Content-Disposition"] = "attachment; filename="+filename+".csv"
-    resp.headers["Content-Type"] = "text/csv"
-    return resp
+    download = df.to_csv()
+    filepath = os.path.join("temp", filename+".csv")
+    with open(filepath, 'w') as file:
+        file.write(download)
+    return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv'), os.remove(filepath)
 
 @app.route('/documentation')
 def documentation():
