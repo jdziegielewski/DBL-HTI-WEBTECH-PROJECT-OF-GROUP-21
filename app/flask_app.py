@@ -1,5 +1,5 @@
 import os, shutil, cloudpickle
-import xlrd
+import xlrd, json
 import numpy as np
 import time
 # import visualization
@@ -8,7 +8,7 @@ import networkx as nx
 from bokeh.embed import components
 from bokeh.client import pull_session
 from bokeh.embed import server_session
-from flask import Flask, render_template, session, request, redirect, flash, send_from_directory, send_file, make_response
+from flask import Flask, render_template, session, request, redirect, flash, send_file
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
@@ -62,18 +62,18 @@ def close_file():
     return redirect('/files')
 
 
-def load_local(filename):#, sep=';'):
-    #path = os.path.join(UPLOAD_FOLDER, filename)
-    #dataframe = pd.read_csv(path, sep=sep, index_col=0)
-    #dataframe = dataframe.stack().reset_index()
-    #dataframe = dataframe[dataframe[0] > 0]
-    #dataframe.columns = ['start', 'end', 'weight']
+def load_local(filename, sep=';'):
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    dataframe = pd.read_csv(path, sep=sep, index_col=0)
+    dataframe = dataframe.stack().reset_index()
+    dataframe = dataframe[dataframe[0] > 0]
+    dataframe.columns = ['start', 'end', 'weight']
     #dg = nx.from_pandas_adjacency(dataframe)
-    #return dataframe
-    load_obj(filename)
+    return dataframe
+    #load_obj(filename) # <- this function replaces this ^ function
 
 
-def store_local(filename, sep=None):
+def store_local_adm(filename, sep=None, edgelist=False):
     #---------------------------------
     path = os.path.join('temp', filename)
     if sep == "excel":
@@ -94,16 +94,45 @@ def store_local(filename, sep=None):
             dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)#python engine can infer separators to an extent
     
     if 'Unnamed: 0' in dataframe.columns.values:
-        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv)
+        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv/txt)
         dataframe = dataframe.drop('NaNs', axis=1)
-    
-    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) delete the dataset
-        os.remove(path)
-        flash("Uploaded file is not an adjacency matrix", "error")
-        return redirect("/files")
-    
-    return dataframe
+    if not edgelist:
+        print(dataframe)
+        if adm_check(dataframe):
+            return dataframe
+        else:
+            flash("Uploaded dataset does not have adjacency matrix format. Did you mean to upload an edge list?", "error")
+            return redirect('/files')
+    else:
+        dataframe['edge_idx'] = dataframe.index
+        dataframe.columns = ['start', 'end', 'weight', 'edge_idx']
+        if edli_check(dataframe):
+            dataframe = edli2adm(dataframe)
+            return dataframe
+        else:
+            flash(flash("Uploaded dataset does not have edge list format. Did you mean to upload an adjacency matrix?", "error"))
+
+
+def adm_check(dataframe):
+    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) return False
+        return False
+    return True
     #----------------------------------
+
+def edli_check(dataframe):
+    if dataframe.shape != (len(dataframe), 4): #if not nx4 edge list (wrong format) return False
+        return False
+    return True
+
+def edli2adm(dataframe):
+    nodes = dataframe.start.unique()
+    np.append(nodes, dataframe.end.unique())
+    nodes = list(dict.fromkeys(nodes))
+    adm = pd.DataFrame(index=nodes, columns=nodes)
+    for i in range(len(dataframe['start'])):
+        adm[dataframe['start'][i]][dataframe['end'][i]] = dataframe['weight'][i]
+        adm = adm.fillna(0)
+    return adm
 
 @app.route("/files", methods=["POST", "GET"])
 def files():
@@ -121,7 +150,7 @@ def files():
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a supported filetype", "error")
             return redirect("/files")
-
+    # v preprocess? v
         target = os.path.join(APP_ROOT, 'temp')
         if not os.path.isdir(target):
             os.mkdir(target)
@@ -135,8 +164,11 @@ def files():
             SEPARATOR = "json"
         else:
             SEPARATOR = request.form["sep"]
-        save_obj(store_local(file.filename, sep=SEPARATOR), file.filename)
-        flash("File successfully uploaded!", "success")
+        df = store_local_adm(file.filename, sep=SEPARATOR, edgelist=request.form.get("edgelist"))
+        if isinstance(df, pd.DataFrame):
+            save_obj(df, file.filename)
+            os.remove(os.path.join("temp", file.filename))
+            flash("File successfully uploaded!", "success")
         return redirect("/files")
 
     else:
@@ -147,20 +179,17 @@ def files():
         for i in range(len(uploaded_files)):
             uploaded_files[i] = uploaded_files[i].replace('.pkl', '')
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
-
+    # ^             ^
 
 @app.route('/download')
 def download():
     filename = request.args.get("file")
     df = load_obj(filename)
-    #file = df.to_csv(os.path.join(APP_ROOT, "temp", filename + ".csv"))
-    #response = make_response(file)
-    #response.headers['Content-Disposition'] = "attachment: filename="+filename+".csv"
-    #return response
-    resp = make_response(df.to_csv(encoding='utf-8'))
-    resp.headers["Content-Disposition"] = "attachment; filename="+filename+".csv"
-    resp.headers["Content-Type"] = "text/csv"
-    return resp
+    download = df.to_csv()
+    filepath = os.path.join("temp", filename+".csv")
+    with open(filepath, 'w') as file:
+        file.write(download)
+    return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv'), os.remove(filepath)
 
 @app.route('/documentation')
 def documentation():
