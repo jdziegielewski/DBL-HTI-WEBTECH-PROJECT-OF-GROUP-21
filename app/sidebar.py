@@ -36,6 +36,7 @@ def edge_settings(param):
                      param.esel_col,
                      param.esel_alpha,
                      param.bundle,
+                     param.directed,
                      param.rendering_method,
                      width=200)
 

@@ -5,7 +5,7 @@ import networkx as nx
 import holoviews as hv
 import datashader as ds
 from holoviews import opts
-from holoviews.streams import Selection1D, Params
+from holoviews.streams import Selection1D
 from holoviews.element.graphs import layout_nodes
 from holoviews.operation.datashader import rasterize, datashade, bundle_graph, dynspread, shade
 
@@ -37,6 +37,9 @@ class NodeLink(pm.Parameterized):
     edge_bundle = pm.Selector(label='Edge Bundling', objects=['Off', 'On'])
     rendering_method = pm.Selector(label='Rendering Method', objects=['Interactive', 'Datashaded'])
 
+    directed = pm.Selector(label='Show arrows?', objects={'No': False, 'Yes': True}, default=False)
+    arrowhead_length = pm.Magnitude(label='Arrowhead Length', default=0.05)
+
     toolbar = pm.Selector(
         objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
         label='Node-Link Toolbar', default='above')
@@ -62,6 +65,7 @@ class NodeLink(pm.Parameterized):
         self.admatrix = admatrix
 
     def update_layout(self):
+        self.graph.opts(directed=self.directed, arrowhead_length=0.05)
         new_graph = None
         if self.last_layout is not self.layout:
             self.last_layout = self.layout
@@ -85,7 +89,7 @@ class NodeLink(pm.Parameterized):
     def get_graph(self):
         return self.bundled_graph if self.bundle else self.graph
 
-    @pn.depends('layout', 'edge_col', 'bundle', 'rendering_method')
+    @pn.depends('layout', 'edge_col', 'bundle', 'rendering_method', 'directed', 'arrowhead_length')
     def draw_edges(self):
         self.update_layout()
         return self.edges
