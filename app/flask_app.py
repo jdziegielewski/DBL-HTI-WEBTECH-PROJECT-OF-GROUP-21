@@ -73,7 +73,7 @@ def load_local(filename, sep=';'):
     #load_obj(filename) # <- this function replaces this ^ function
 
 
-def store_local(filename, sep=None):
+def store_local_adm(filename, sep=None, edgelist=False):
     #---------------------------------
     path = os.path.join('temp', filename)
     if sep == "excel":
@@ -94,16 +94,45 @@ def store_local(filename, sep=None):
             dataframe = pd.read_csv(path, sep=None, engine="python", index_col=0)#python engine can infer separators to an extent
     
     if 'Unnamed: 0' in dataframe.columns.values:
-        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv)
+        dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv/txt)
         dataframe = dataframe.drop('NaNs', axis=1)
-    
-    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) delete the dataset
-        os.remove(path)
-        flash("Uploaded file is not an adjacency matrix", "error")
-        return redirect("/files")
-    
-    return dataframe
+    if not edgelist:
+        print(dataframe)
+        if adm_check(dataframe):
+            return dataframe
+        else:
+            flash("Uploaded dataset does not have adjacency matrix format. Did you mean to upload an edge list?", "error")
+            return redirect('/files')
+    else:
+        dataframe['edge_idx'] = dataframe.index
+        dataframe.columns = ['start', 'end', 'weight', 'edge_idx']
+        if edli_check(dataframe):
+            dataframe = edli2adm(dataframe)
+            return dataframe
+        else:
+            flash(flash("Uploaded dataset does not have edge list format. Did you mean to upload an adjacency matrix?", "error"))
+
+
+def adm_check(dataframe):
+    if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) return False
+        return False
+    return True
     #----------------------------------
+
+def edli_check(dataframe):
+    if dataframe.shape != (len(dataframe), 4): #if not nx4 edge list (wrong format) return False
+        return False
+    return True
+
+def edli2adm(dataframe):
+    nodes = dataframe.start.unique()
+    np.append(nodes, dataframe.end.unique())
+    nodes = list(dict.fromkeys(nodes))
+    adm = pd.DataFrame(index=nodes, columns=nodes)
+    for i in range(len(dataframe['start'])):
+        adm[dataframe['start'][i]][dataframe['end'][i]] = dataframe['weight'][i]
+        adm = adm.fillna(0)
+    return adm
 
 @app.route("/files", methods=["POST", "GET"])
 def files():
@@ -135,8 +164,11 @@ def files():
             SEPARATOR = "json"
         else:
             SEPARATOR = request.form["sep"]
-        save_obj(store_local(file.filename, sep=SEPARATOR), file.filename)
-        flash("File successfully uploaded!", "success")
+        df = store_local_adm(file.filename, sep=SEPARATOR, edgelist=request.form.get("edgelist"))
+        if isinstance(df, pd.DataFrame):
+            save_obj(df, file.filename)
+            os.remove(os.path.join("temp", file.filename))
+            flash("File successfully uploaded!", "success")
         return redirect("/files")
 
     else:
