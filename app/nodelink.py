@@ -80,7 +80,7 @@ class NodeLink(pm.Parameterized):
                 new_graph = self.graph
         if new_graph:
             self.edges = new_graph.edgepaths
-            if not self.last_bundle:
+            if self.last_bundle:
                 self.edges = self.edges.add_dimension('weight', 0, self.dataset.dframe(dimensions=['weight'])['weight'],
                                                       vdim=True)
             self.nodes = new_graph.nodes
@@ -92,6 +92,10 @@ class NodeLink(pm.Parameterized):
     @pn.depends('layout', 'edge_col', 'bundle', 'rendering_method', 'directed', 'arrowhead_length')
     def draw_edges(self):
         self.update_layout()
+        # if self.edges is not None and self.rendering_method is 'Interactive':
+            # print("SUCCESS")
+            # pass
+            # self.edges.opts(opts.EdgePaths(color='weight'))#,cmap=self.edge_col))
         return self.edges
 
     @pn.depends('layout', 'node_col', 'line_col', 'node_size', 'node_alpha')

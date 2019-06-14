@@ -1,6 +1,7 @@
 import sys
 import sidebar
 import cloudpickle
+import numpy as np
 import holoviews as hv
 from nodelink import NodeLink
 from admatrix import AdMatrix
@@ -20,7 +21,18 @@ def get_edge_list(df):
     edge_list.columns = ['start', 'end', 'weight']
     edge_list = edge_list.reset_index()
     edge_list['edge_idx'] = edge_list.index
-    return hv.Table(edge_list)
+    return edge_list
+    #return hv.Table(edge_list)
+
+
+def add_missing_nodes(edge_list):
+    index_edge_list = np.unique(edge_list[["start", "end"]].values)
+    index_dataframe = df.index
+    if len(index_edge_list) != len(index_dataframe):
+        diff = set(index_dataframe) - set(index_edge_list)
+        for i in diff:
+            edge_list = edge_list.append({"start": i, "end": i, "weight": 0}, ignore_index=True)
+    return edge_list
 
 
 filename = sys.argv[1]
@@ -29,8 +41,8 @@ edges = get_edge_list(df)
 
 
 def modify_doc(doc):
-    nodelink = NodeLink(edges)
-    admatrix = AdMatrix(edges, df)
+    nodelink = NodeLink(hv.Table(add_missing_nodes(edges)))
+    admatrix = AdMatrix(hv.Table(edges), df)
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
     return sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view).server_doc(doc=doc)
