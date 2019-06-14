@@ -172,7 +172,8 @@ def files():
         return redirect("/files")
 
     else:
-        shutil.rmtree('temp')
+        if os.path.isdir('temp'):
+            shutil.rmtree('temp')
         os.mkdir('temp')
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
         uploaded_files = os.listdir(target)
@@ -189,7 +190,7 @@ def download():
     filepath = os.path.join("temp", filename+".csv")
     with open(filepath, 'w') as file:
         file.write(download)
-    return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv'), os.remove(filepath)
+    return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
 
 @app.route('/documentation')
 def documentation():
