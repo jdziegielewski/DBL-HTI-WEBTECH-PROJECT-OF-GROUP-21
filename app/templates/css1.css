@@ -48,7 +48,7 @@ h1.logo {
 }
 
 .group{
-
+	min-height:600px;
 	padding: 20px;
 	background-color: #FFD045;
 	margin-left:auto;
@@ -58,7 +58,7 @@ h1.logo {
 
 }
 .project{
-
+	min-height: 600px;
 	padding: 20px;
 	background-color: #FFFCFF;
 	margin-left:auto;
