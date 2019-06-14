@@ -59,8 +59,6 @@ def matrix_settings(param):
                      param.nons_alpha,
                      param.esel_col,
                      param.esel_alpha,
-                     param.x_axis,
-                     param.y_axis,
                      width=200)
 
 
