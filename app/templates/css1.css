@@ -95,13 +95,14 @@ h1.logo {
 
 footer {
 	display : flex;
-	justify-content : center;
+	justify-content :center;
 	align-items : center;
 	padding : 20px 5%;
-	color:#002642;
+	color:#7CC6FE;
 	list-style : none;
 	clear:both;
 	background-color : #002642;
+	text-decoration : none;
 }
 
 

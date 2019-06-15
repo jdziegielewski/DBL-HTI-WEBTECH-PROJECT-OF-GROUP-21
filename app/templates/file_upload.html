@@ -1,14 +1,15 @@
  <style type="text/css">{% include 'css1.css' %}</style>
 <form enctype = "multipart/form-data" action = "/files" method = "POST">
-<br> </br>
+<br></br>
 
 	
     <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
     <label for = "file">Choose a file</label>
-
+	
+	<br/>
     <span id = "filename"></span>
     <label for = "filename"></label>
-
+<br></br>
     <div id="sep">
         <input type="text" id="sep" name="sep" />
         <label for="sep">Custom separator (optional)</label>
@@ -17,8 +18,9 @@
         <input type="checkbox" id="edgelist" name="edgelist" />
         <label for="edgelist">I am uploading an edge list dataset</label>
     </div>
+	
 
-    <br/>
+   
     <input type = "submit" id = "submit" name = "submit" class = "uploadfile" />
     <label for = "submit">Upload</label>
 </form>
@@ -26,7 +28,7 @@
 {% with messages = get_flashed_messages(category_filter = ["error"]) %}
     {% if messages %}
         {% for message in messages %}
-            <strong>Error: </strong> {{ message }}
+           <strong>Error: </strong> {{ message }}
         {% endfor %}
     {% endif %}
 {% endwith %}
@@ -34,7 +36,7 @@
 {% with messages = get_flashed_messages(category_filter = ["success"]) %}
     {% if messages %}
         {% for message in messages %}
-            {{ message }}
+           {{ message }}
         {% endfor %}
     {% endif %}
 {% endwith %}
