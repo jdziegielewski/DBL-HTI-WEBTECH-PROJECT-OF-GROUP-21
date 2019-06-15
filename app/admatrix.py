@@ -107,7 +107,7 @@ class AdMatrix(pm.Parameterized):
     esel_col = pm.Selector(label='Node Selection Color', objects=settings.cmaps, default=['green'])
     esel_alpha = pm.Magnitude(label='Node Selection Alpha', default=0.7)
     agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'], default='Complete')
-    agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=1)
+    agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=2)
     x_axis = pm.Selector(label='Matrix X-Axis Labels', objects={'None': None, 'Top': 'top', 'Bottom': 'bottom'})
     y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects={'None': None, 'Left': 'left', 'Right': 'right'})
     toolbar = pm.Selector(objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
