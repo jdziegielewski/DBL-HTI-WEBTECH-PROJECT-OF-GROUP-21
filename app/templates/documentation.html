@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 {% block content1 %}
 <style type="text/css"> {% include 'css1.css' %} 
-.tab {margin-left: 40px;}
-.tab2 {margin-left: 80px;}
+
 </style>
 
 <div class="row">
     <div class="col-sm-2 col-md-4 group">
-        <h1><a href="documentation?section=general"><span>General</span></a></h1>
-        <h1><a href="/documentation?section=csvtxt"><span>CSV/TXT</span></a></h1>
-        <h1><a href="/documentation?section=xl"><span>Excel Sheets</span></a></h1>
-        <h1><a href="/documentation?section=json"><span>JSON</span></a></h1>
-        <h1><a href="/documentation?section=edgelist"><span>Edge lists???</span></a></h1>
+        <h1><a href="documentation?section=general">General</a></h1>
+        <h1><a href="/documentation?section=csvtxt">CSV/TXT</a></h1>
+        <h1><a href="/documentation?section=xl">Excel Sheets</a></h1>
+        <h1><a href="/documentation?section=json">JSON</a></h1>
+        <h1><a href="/documentation?section=edgelist">Edge lists??</a></h1>
     </div>
     <div class="col-sm-10 col-md-8 project">
 {% if section == 'general' %}

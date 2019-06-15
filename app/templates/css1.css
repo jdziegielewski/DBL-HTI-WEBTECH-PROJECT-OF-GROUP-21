@@ -5,7 +5,7 @@
 	margin : 0;
 	padding : 0;
 	font-family : "Ubuntu", sand-serif;
-/*	color:#FFFCFF;*/
+	font-size:17px;
 }
 li, a {
 	font-family : "Ubuntu", sand-serif;
@@ -27,7 +27,7 @@ h1.logo {
 	margin-right : auto;
 	color : #FFBF00;
 	cursor : default;
-	font-size : 19px;
+	font-size : 26px;
 }
 
 .menu {
@@ -44,7 +44,8 @@ h1.logo {
 
 }
 .menu li  a:hover{
-	color : #F6BBB4;
+	color : #FFBF00;
+	text-decoration: none;
 }
 
 .group{
@@ -57,6 +58,14 @@ h1.logo {
 	float:left;
 
 }
+.group a{
+	transition : all 0.2s ease 0s;
+	color : #002642;
+}
+.group a:hover {
+  color: #7CC6FE;
+  text-decoration: none;
+}
 .project{
 	min-height: 600px;
 	padding: 20px;
@@ -65,6 +74,15 @@ h1.logo {
 	margin-right:auto;
 	text-align:justify;
 	float:right;
+}
+.project a{
+	transition : all 0.2s ease 0s;
+	color : #007DDD;
+	font-size:17px;
+}
+.project a:hover {
+  color: #7CC6FE;
+  text-decoration: none;
 }
 .files{
 
@@ -77,13 +95,14 @@ h1.logo {
 
 footer {
 	display : flex;
-	justify-content : center;
+	justify-content :center;
 	align-items : center;
 	padding : 20px 5%;
-	color:#002642;
+	color:#7CC6FE;
 	list-style : none;
 	clear:both;
 	background-color : #002642;
+	text-decoration : none;
 }
 
 
