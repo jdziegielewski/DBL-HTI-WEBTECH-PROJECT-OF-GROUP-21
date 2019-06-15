@@ -80,9 +80,9 @@ class NodeLink(pm.Parameterized):
                 new_graph = self.graph
         if new_graph:
             self.edges = new_graph.edgepaths
-            if self.last_bundle:
-                self.edges = self.edges.add_dimension('weight', 0, self.dataset.dframe(dimensions=['weight'])['weight'],
-                                                      vdim=True)
+            # if self.last_bundle:
+                # self.edges = self.edges.add_dimension('weight', 0, self.dataset.dframe(dimensions=['weight'])['weight'],
+                                                      # vdim=True)
             self.nodes = new_graph.nodes
             self.nodes.opts(opts.Nodes(tools=settings.tools))
 

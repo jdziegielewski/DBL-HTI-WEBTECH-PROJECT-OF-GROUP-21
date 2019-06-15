@@ -28,6 +28,7 @@ def sorted_diagonal(df):
 
 def agglomerative_clustering(df, linkage, n_clusters=2):
     clustering = AgglomerativeClustering(affinity='precomputed', linkage=linkage, n_clusters=n_clusters).fit(df)
+    # clustering.
 
     clusters = {}
     for i in range(n_clusters):
