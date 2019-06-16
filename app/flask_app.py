@@ -22,12 +22,14 @@ URL = "group21/index.wsgi/"
 
 
 def save_obj(obj, name):
-    with open('uploads/'+ name + '.pkl', 'wb') as file:
+    path = os.path.join(APP_ROOT, UPLOAD_FOLDER, name + '.pkl')
+    with open(path, 'wb') as file:
         cloudpickle.dump(obj, file)
 
 
 def load_obj(name):
-    with open('uploads/' + name + '.pkl', 'rb') as file:
+    path = os.path.join(APP_ROOT, UPLOAD_FOLDER, name + '.pkl')
+    with open(path, 'rb') as file:
         return cloudpickle.load(file)
 
 
@@ -43,7 +45,7 @@ def index1():
 
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
-    script = server_document('http://localhost:5006/bokeh_app', arguments={'filename': filename})
+    script = server_document('http://localhost:5006/bokeh_app', arguments={'file': filename})
     return render_template("visualization.html", script=script, url=URL, template="Flask")
 
 
@@ -131,7 +133,7 @@ def files():
         if not os.path.isdir(target):
             os.mkdir(target)
 
-        destination = "/".join([target, file.filename])
+        destination = os.path.join(target, file.filename)
         file.save(destination)
     
         if file.filename.rsplit(".", 1)[1].lower() in ["xlsx", "xls", "xlsm"]:
@@ -147,9 +149,10 @@ def files():
             flash("File successfully uploaded!", "success")
         return redirect("/"+URL+"networks")
     else:
-        if os.path.isdir('temp'):
-            shutil.rmtree('temp')
-        os.mkdir('temp')
+        # temp_path = os.path.join(APP_ROOT, 'temp')
+        # if os.path.isdir(temp_path):
+            # shutil.rmtree(temp_path)
+        # os.mkdir(temp_path)
         target = os.path.join(APP_ROOT, UPLOAD_FOLDER)
         uploaded_files = os.listdir(target)
         for i in range(len(uploaded_files)):
@@ -162,11 +165,12 @@ def files():
 def download():
     filename = request.args.get("file")
     df = load_obj(filename)
-    download = df.to_csv()
     filepath = os.path.join(APP_ROOT, "temp", filename+".csv")
-    with open(filepath, 'w') as file:
-        file.write(download)
-    return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
+    df.to_csv(filepath)
+    resp = send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
+    os.remove(filepath)
+    return resp
+
 
 @app.route('/delete')
 def delete():

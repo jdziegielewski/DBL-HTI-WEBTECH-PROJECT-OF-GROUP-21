@@ -39,7 +39,7 @@ def add_missing_nodes(df, edge_list):
 
 def modify_doc(doc):
     args = doc.session_context.request.arguments
-    filename = str(args['filename'][0].decode('utf-8'))
+    filename = str(args['file'][0].decode('utf-8'))
     df = load_local(filename)
     edges = get_edge_list(df)
     nodelink = NodeLink(hv.Table(add_missing_nodes(df, edges)))
