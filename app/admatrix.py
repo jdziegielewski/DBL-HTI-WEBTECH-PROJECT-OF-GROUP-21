@@ -1,19 +1,13 @@
 import settings
+import operator
 import param as pm
 import holoviews as hv
-import datashader as ds
+import numpy.linalg as la
 from holoviews import opts
 from holoviews.streams import Selection1D
-from holoviews.operation.datashader import datashade, dynspread, shade
 from scipy.sparse import csgraph, csc_matrix
-from sklearn.cluster import AgglomerativeClustering
-import networkx as nx
-import numpy as np
-import numpy.linalg as la
-import pandas as pd
-import holoviews as hv
-from scipy.sparse import csgraph
-import operator
+from sklearn.cluster import AgglomerativeClustering, SpectralClustering
+
 
 renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
@@ -48,6 +42,10 @@ def agglomerative_clustering(df, linkage, n_clusters=2):
         final_clustering.append(index_dataframe[final_clustering_order[i]])
 
     return make_diagonal(final_clustering)
+
+
+def spectral_clustering(df):
+    clustering = SpectralClustering().fit(df)
 
 
 def reverse_cuthill_mckee(df):
@@ -105,8 +103,8 @@ class AdMatrix(pm.Parameterized):
     alpha = pm.Magnitude(label='Alpha', default=0.7)
     nons_alpha = pm.Magnitude(label='Nonselection Alpha', default=0.1)
     size = pm.Number(label='Size', default=5, bounds=(1, 10))
-    esel_col = pm.Selector(label='Node Selection Color', objects=settings.cmaps, default=['green'])
-    esel_alpha = pm.Magnitude(label='Node Selection Alpha', default=0.7)
+    esel_col = pm.Selector(label='Nodes to Matrix Color', objects=settings.cmaps, default=['green'])
+    esel_alpha = pm.Magnitude(label='Nodes to Matrix Alpha', default=0.7)
     agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'], default='Complete')
     agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=2)
     x_axis = pm.Selector(label='Matrix X-Axis Labels', objects={'None': None, 'Top': 'top', 'Bottom': 'bottom'})

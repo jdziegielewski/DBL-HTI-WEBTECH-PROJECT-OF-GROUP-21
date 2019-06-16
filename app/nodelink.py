@@ -7,7 +7,7 @@ import datashader as ds
 from holoviews import opts
 from holoviews.streams import Selection1D
 from holoviews.element.graphs import layout_nodes
-from holoviews.operation.datashader import rasterize, datashade, bundle_graph, dynspread, shade
+from holoviews.operation.datashader import datashade, aggregate, bundle_graph, dynspread, shade
 
 
 class NodeLink(pm.Parameterized):
@@ -20,11 +20,11 @@ class NodeLink(pm.Parameterized):
     edge_col = pm.Selector(label='Edge Color', objects=settings.cmaps, default=['blue', 'magenta', 'yellow'])
     edge_alpha = pm.Integer(label='Edge Alpha', default=200, bounds=(0, 255))
 
-    nsel_col = pm.Selector(label='Node Selection Color', objects=settings.cmaps, default=['green'])
-    nsel_alpha = pm.Integer(label='Node Selection Alpha', default=200, bounds=(0, 255))
+    nsel_col = pm.Selector(label='Nodes to Edges Color', objects=settings.cmaps, default=['green'])
+    nsel_alpha = pm.Integer(label='Nodes to Edges Alpha', default=200, bounds=(0, 255))
 
-    esel_col = pm.Selector(label='Edge Selection Color', objects=settings.cmaps, default=['purple'])
-    esel_alpha = pm.Integer(label='Edge Selection Alpha', default=200, bounds=(0, 255))
+    esel_col = pm.Selector(label='Matrix to Edges Color', objects=settings.cmaps, default=['purple'])
+    esel_alpha = pm.Integer(label='Matrix to Edges Alpha', default=200, bounds=(0, 255))
 
     node_size = pm.Number(label='Node Size', default=5, bounds=(1, 10))
     node_col = pm.Color(label='Node Fill Color', default='#2b9ad0')
@@ -33,12 +33,9 @@ class NodeLink(pm.Parameterized):
 
     bg_col = pm.Color(label='Background Color', default='#ffffff')
 
-    bundle = pm.Boolean(label='Edge Bundling', default=False)
-    edge_bundle = pm.Selector(label='Edge Bundling', objects=['Off', 'On'])
-    rendering_method = pm.Selector(label='Rendering Method', objects=['Interactive', 'Datashaded'])
-
-    directed = pm.Selector(label='Show arrows?', objects={'No': False, 'Yes': True}, default=False)
-    arrowhead_length = pm.Magnitude(label='Arrowhead Length', default=0.05)
+    # bundle = pm.Boolean(label='Edge Bundling', default=False)
+    # edge_bundle = pm.Selector(label='Edge Bundling', objects=['Off', 'On'])
+    rendering_method = pm.Selector(label='Rendering Method', default='Datashaded', objects=['Interactive', 'Datashaded', 'Bundled & Datashaded'])
 
     toolbar = pm.Selector(
         objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
@@ -65,37 +62,35 @@ class NodeLink(pm.Parameterized):
         self.admatrix = admatrix
 
     def update_layout(self):
-        self.graph.opts(directed=self.directed, arrowhead_length=0.05)
         new_graph = None
         if self.last_layout is not self.layout:
             self.last_layout = self.layout
             self.graph = layout_nodes(self.graph, layout=self.layout_dict[self.last_layout])
             new_graph = self.graph
-        if new_graph or self.last_bundle is not self.bundle:
-            self.last_bundle = self.bundle
-            if self.bundle:
+            self.last_bundle = False
+        new_bundle = self.rendering_method == 'Bundled & Datashaded'
+        if self.last_bundle is not new_bundle:
+            self.last_bundle = new_bundle
+            if new_bundle:
                 self.bundled_graph = bundle_graph(self.graph)
                 new_graph = self.bundled_graph
             else:
                 new_graph = self.graph
         if new_graph:
             self.edges = new_graph.edgepaths
-            # if self.last_bundle:
-                # self.edges = self.edges.add_dimension('weight', 0, self.dataset.dframe(dimensions=['weight'])['weight'],
-                                                      # vdim=True)
+            if self.rendering_method != 'Bundled & Datashaded':
+                self.edges = self.edges.add_dimension('weight', dim_pos=1, dim_val=self.dataset['weight'], vdim=True)
             self.nodes = new_graph.nodes
             self.nodes.opts(opts.Nodes(tools=settings.tools))
 
     def get_graph(self):
-        return self.bundled_graph if self.bundle else self.graph
+        return self.bundled_graph if self.rendering_method == 'Bundled & Datashaded' else self.graph
 
-    @pn.depends('layout', 'edge_col', 'bundle', 'rendering_method', 'directed', 'arrowhead_length')
+    @pn.depends('layout', 'edge_col', 'edge_alpha', 'rendering_method')
     def draw_edges(self):
         self.update_layout()
-        # if self.edges is not None and self.rendering_method is 'Interactive':
-            # print("SUCCESS")
-            # pass
-            # self.edges.opts(opts.EdgePaths(color='weight'))#,cmap=self.edge_col))
+        if self.rendering_method != 'Bundled & Datashaded':
+            self.edges.opts(opts.EdgePaths(color='weight', cmap=self.edge_col, alpha=self.edge_alpha, line_width=hv.dim('weight')))
         return self.edges
 
     @pn.depends('layout', 'node_col', 'line_col', 'node_size', 'node_alpha')
@@ -107,7 +102,7 @@ class NodeLink(pm.Parameterized):
             alpha=self.node_alpha))
         return self.nodes
 
-    @pn.depends('layout', 'bundle')
+    @pn.depends('layout')
     def draw_node_select(self, index):
         starts = self.get_graph().nodes.dimension_values('index')[index]
         if len(starts) == 0:
@@ -115,9 +110,8 @@ class NodeLink(pm.Parameterized):
         else:
             return self.get_graph().select(start=starts.tolist())
 
-    @pn.depends('layout', 'bundle')
+    @pn.depends('layout', 'rendering_method')
     def draw_edge_select(self, index=None):
-        # print(index)
         if not index:
             return hv.Curve(([0], [0]))
         else:
@@ -127,8 +121,10 @@ class NodeLink(pm.Parameterized):
     def view(self):
         dyn_edges = self.dyn_edges
         if self.rendering_method == 'Datashaded':
+            dyn_edges = aggregate(dyn_edges, aggregator=ds.mean('weight'), precompute=True)
+            dyn_edges = shade(dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha)
+        elif self.rendering_method == 'Bundled & Datashaded':
             dyn_edges = datashade(self.dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha, precompute=True)
-
         self.dyn_edge_select = hv.DynamicMap(self.draw_edge_select, streams=[self.admatrix.edge_stream])
         hv_plot = \
             dyn_edges \

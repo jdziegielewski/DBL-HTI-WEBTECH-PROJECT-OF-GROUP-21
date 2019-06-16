@@ -19,14 +19,17 @@ ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json", "zip", "gz", 
 
 LAST_FILE = ""
 
+
 #For saving SEPARATORS
 def save_obj(obj, name):
     with open('uploads/'+ name + '.pkl', 'wb') as file:
         cloudpickle.dump(obj, file)
 
+
 def load_obj(name):
     with open('uploads/' + name + '.pkl', 'rb') as file:
         return cloudpickle.load(file)
+
 
 @app.route('/')
 def index():
@@ -55,6 +58,7 @@ def visualize_file(filename):
     dashboard = visualization.create_dashboard(graph, filename)
     script, div = components(dashboard)
     return render_template("visualization.html", script=script, div=div, last_file=get_last_file())
+
 
 @app.route('/close')
 def close_file():
@@ -119,10 +123,12 @@ def adm_check(dataframe):
     return True
     #----------------------------------
 
+
 def edli_check(dataframe):
     if dataframe.shape != (len(dataframe), 4): #if not nx4 edge list (wrong format) return False
         return False
     return True
+
 
 def edli2adm(dataframe):
     nodes = dataframe.start.unique()
@@ -133,6 +139,7 @@ def edli2adm(dataframe):
         adm[dataframe['start'][i]][dataframe['end'][i]] = dataframe['weight'][i]
         adm = adm.fillna(0)
     return adm
+
 
 @app.route("/files", methods=["POST", "GET"])
 def files():
@@ -170,7 +177,6 @@ def files():
             os.remove(os.path.join("temp", file.filename))
             flash("File successfully uploaded!", "success")
         return redirect("/files")
-
     else:
         if os.path.isdir('temp'):
             shutil.rmtree('temp')
@@ -182,6 +188,7 @@ def files():
         return render_template("files.html", files=uploaded_files, last_file=get_last_file())
     # ^             ^
 
+
 @app.route('/download')
 def download():
     filename = request.args.get("file")
@@ -192,9 +199,11 @@ def download():
         file.write(download)
     return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
 
+
 @app.route('/documentation')
 def documentation():
     return render_template('documentation.html', section=request.args.get('section'), last_file=get_last_file())
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
