@@ -167,6 +167,15 @@ def download():
         file.write(download)
     return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
 
+@app.route('/delete')
+def delete():
+    filename = request.args.get("file")
+    path = os.path.join("uploads", filename + ".pkl")
+    if os.path.isfile(path):
+        os.remove(path)
+        flash("File "+filename+" was deleted.", "success")
+    return redirect('/files')
+
 
 @app.route('/documentation')
 def documentation():
