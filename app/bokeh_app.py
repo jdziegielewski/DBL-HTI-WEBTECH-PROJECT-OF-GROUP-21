@@ -1,14 +1,13 @@
-import sys
 import sidebar
 import cloudpickle
 import numpy as np
 import holoviews as hv
+from bokeh.server.server import Server
+from tornado.ioloop import IOLoop
 from nodelink import NodeLink
 from admatrix import AdMatrix
-from bokeh.server.server import Server
 
-renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
-
+# renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
 
 def load_local(name):
     with open('uploads/' + name + '.pkl', 'rb') as file:
@@ -22,10 +21,9 @@ def get_edge_list(df):
     edge_list = edge_list.reset_index()
     edge_list['edge_idx'] = edge_list.index
     return edge_list
-    #return hv.Table(edge_list)
 
 
-def add_missing_nodes(edge_list):
+def add_missing_nodes(df, edge_list):
     index_edge_list = np.unique(edge_list[["start", "end"]].values)
     index_dataframe = df.index
     if len(index_edge_list) != len(index_dataframe):
@@ -35,19 +33,20 @@ def add_missing_nodes(edge_list):
     return edge_list
 
 
-filename = sys.argv[1]
-df = load_local(filename)
-edges = get_edge_list(df)
-
-
 def modify_doc(doc):
-    nodelink = NodeLink(hv.Table(add_missing_nodes(edges)))
+    args = doc.session_context.request.arguments
+    filename = str(args['filename'][0].decode('utf-8'))
+    df = load_local(filename)
+    edges = get_edge_list(df)
+    nodelink = NodeLink(hv.Table(add_missing_nodes(df, edges)))
     admatrix = AdMatrix(hv.Table(edges), df)
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
     return sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view).server_doc(doc=doc)
 
 
-server = Server({'/': modify_doc}, port=5006, allow_websocket_origin=['*'])
-server.start()
-server.run_until_shutdown()
+def io_worker():
+    server = Server({'/bokeh_app': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"])
+    server.start()
+    server.io_loop.start()
+    return
