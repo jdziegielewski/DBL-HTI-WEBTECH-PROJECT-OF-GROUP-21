@@ -7,11 +7,11 @@
 
 <div class="row">
     <div class="col-sm-2 col-md-4 group">
-        <h1><a href="documentation?section=general">General</a></h1>
-        <h1><a href="/documentation?section=csvtxt">CSV/TXT</a></h1>
-        <h1><a href="/documentation?section=xl">Excel Sheets</a></h1>
-        <h1><a href="/documentation?section=json">JSON</a></h1>
-        <h1><a href="/documentation?section=edgelist">Edge lists??</a></h1>
+        <h1><a href="/{{ url }}documentation?section=general">General</a></h1>
+        <h1><a href="/{{ url }}documentation?section=csvtxt">CSV/TXT</a></h1>
+        <h1><a href="/{{ url }}documentation?section=xl">Excel Sheets</a></h1>
+        <h1><a href="/{{ url }}documentation?section=json">JSON</a></h1>
+        <h1><a href="/{{ url }}documentation?section=edgelist">Edge lists??</a></h1>
     </div>
     <div class="col-sm-10 col-md-8 project">
 {% if section == 'general' %}
@@ -68,7 +68,7 @@ If you want to know how to follow this format in the various supported file type
     You can choose any separator you like.</br>
     To get a correct result, the first line must start with the separator, followed by the node identifiers separated by the separator.</br>
     Every line after that should begin with a node identifier, followed by the weights of the relations separated by the separator.</br></br>
-    The adjacency matrix from the <a href="documentation?section=general">general</a> page looks like this in CSV form (using default separator):</br></br>
+    The adjacency matrix from the <a href="/{{ url }}documentation?section=general">general</a> page looks like this in CSV form (using default separator):</br></br>
 
     ,Node1,Node2,Node3</br>
     Node1,0,1,1</br>
@@ -80,7 +80,7 @@ If you want to know how to follow this format in the various supported file type
 
 {% if section == 'xl' %}
 <h1>Excel sheets</h1>
-<p>To get Excel sheets to work with our tool, you just need to make sure that it looks like the table on the <a href="documentation?section=general">general</a> page in your Excel sheet editor.</br>
+<p>To get Excel sheets to work with our tool, you just need to make sure that it looks like the table on the <a href="/{{ url }}documentation?section=general">general</a> page in your Excel sheet editor.</br>
     Supported Excel sheet formats are: xls, xlsx, xlsm.
 </p>
 {% endif%}
@@ -89,7 +89,7 @@ If you want to know how to follow this format in the various supported file type
 <h1>JSON</h1>
 <p>There are multiple ways to save a table in JSON. 
     To get our tool to work correctly, your JSON file must follow a specific layout.</br>
-    Here is a JSON string of network on the <a href="documentation?section=general">general</a> page:</br></br>
+    Here is a JSON string of network on the <a href="/{{ url }}documentation?section=general">general</a> page:</br></br>
     <span>{</br>
         <span class="tab">"Node1": {</br>
             <span class="tab2">"Node1":0,</span></br>

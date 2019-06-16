@@ -1,15 +1,15 @@
  <style type="text/css">{% include 'css1.css' %}</style>
-<form enctype = "multipart/form-data" action = "/files" method = "POST">
-<br></br>
+<form enctype = "multipart/form-data" action = "/{{ url }}networks" method = "POST">
+<br>
 
 	
     <input type = "file" id = "file" name = "file" class = "inputfile" onchange = "showFilename();" />
     <label for = "file">Choose a file</label>
 	
-	<br/>
+	<br>
     <span id = "filename"></span>
     <label for = "filename"></label>
-<br></br>
+<br>
     <div id="sep">
         <input type="text" id="sep" name="sep" />
         <label for="sep">Custom separator (optional)</label>

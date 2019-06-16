@@ -1,19 +1,19 @@
  <style type="text/css">{% include 'css1.css' %}</style>
 
 {% if files %}<!--if there are files, list them-->
-    <br> </br>
-	<br> </br>
+    <br>
+	<br>
 	<h1>Uploaded Files</h1>
 
     {% for file in files %}
         <!--link to file page, placeholder-->
         <p>
-            <a href="/networks/{{file}}">{{file}}</a>
+            <a href="/{{ url }}networks/{{file}}">{{file}}</a>
             {% if file == last_file %}
-                <a href="/close"> Close</a>
+                <a href="/{{ url }}close"> Close</a>
             {% endif %}
-            <a href="/download?file={{file}}"><span style="float:right">Download</span></a></br>
-            <a href="/delete?file={{file}}"><span style="float:right">Delete</span></a></br>
+            <a href="/{{ url }}download?file={{file}}"><span style="float:right">Download</span></a><br>
+            <a href="/{{ url }}delete?file={{file}}"><span style="float:right">Delete</span></a><br>
         </p>
     {% endfor %}
 {% endif %}

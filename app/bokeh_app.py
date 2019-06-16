@@ -1,3 +1,4 @@
+import os
 import sidebar
 import cloudpickle
 import numpy as np
@@ -8,6 +9,8 @@ from nodelink import NodeLink
 from admatrix import AdMatrix
 
 # renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = "uploads"
 
 def load_local(name):
     with open('uploads/' + name + '.pkl', 'rb') as file:
@@ -36,6 +39,7 @@ def add_missing_nodes(df, edge_list):
 def modify_doc(doc):
     args = doc.session_context.request.arguments
     filename = str(args['filename'][0].decode('utf-8'))
+    filename = os.path.join(APP_ROOT, UPLOAD_FOLDER, filename)
     df = load_local(filename)
     edges = get_edge_list(df)
     nodelink = NodeLink(hv.Table(add_missing_nodes(df, edges)))

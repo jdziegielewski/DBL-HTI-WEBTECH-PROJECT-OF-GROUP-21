@@ -18,7 +18,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json", "zip", "gz", "xz", "bz2"]
 
-LAST_FILE = ""
+URL = "group21/index.wsgi/"
 
 
 def save_obj(obj, name):
@@ -33,23 +33,23 @@ def load_obj(name):
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template("index.html", url=URL)
 
 
 @app.route('/thesis')
 def index1():
-    return render_template("index-thesis.html")
+    return render_template("index-thesis.html", url=URL)
 
 
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
     script = server_document('http://localhost:5006/bokeh_app', arguments={'filename': filename})
-    return render_template("visualization.html", script=script, template="Flask")
+    return render_template("visualization.html", script=script, url=URL, template="Flask")
 
 
 def store_local_adm(filename, sep=None, edgelist=False):
     #---------------------------------
-    path = os.path.join('temp', filename)
+    path = os.path.join(APP_ROOT, 'temp', filename)
     if sep == "excel":
         dataframe = pd.read_excel(path, engine='xlrd', index_col=0)
     elif sep == "json":
@@ -75,7 +75,7 @@ def store_local_adm(filename, sep=None, edgelist=False):
             return dataframe
         else:
             flash("Uploaded dataset does not have adjacency matrix format. Did you mean to upload an edge list?", "error")
-            return redirect('/networks')
+            return redirect("/"+URL+"networks")
     else:
         dataframe['edge_idx'] = dataframe.index
         dataframe.columns = ['start', 'end', 'weight', 'edge_idx']
@@ -115,17 +115,17 @@ def files():
     if request.method == 'POST':
         if "file" not in request.files:
             flash("No file selected", "error")
-            return redirect("/networks")
+            return redirect("/"+URL+"networks")
 
         file = request.files["file"]
 
         if file.filename == "":
             flash("No file selected", "error")
-            return redirect("/networks")
+            return redirect("/"+URL+"networks")
         
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a supported filetype", "error")
-            return redirect("/networks")
+            return redirect("/"+URL+"networks")
     # v preprocess? v
         target = os.path.join(APP_ROOT, 'temp')
         if not os.path.isdir(target):
@@ -143,9 +143,9 @@ def files():
         df = store_local_adm(file.filename, sep=SEPARATOR, edgelist=request.form.get("edgelist"))
         if isinstance(df, pd.DataFrame):
             save_obj(df, file.filename)
-            os.remove(os.path.join("temp", file.filename))
+            os.remove(os.path.join(APP_ROOT, "temp", file.filename))
             flash("File successfully uploaded!", "success")
-        return redirect("/networks")
+        return redirect("/"+URL+"networks")
     else:
         if os.path.isdir('temp'):
             shutil.rmtree('temp')
@@ -154,7 +154,7 @@ def files():
         uploaded_files = os.listdir(target)
         for i in range(len(uploaded_files)):
             uploaded_files[i] = uploaded_files[i].replace('.pkl', '')
-        return render_template("files.html", files=uploaded_files)
+        return render_template("files.html", files=uploaded_files, url=URL)
     # ^             ^
 
 
@@ -163,7 +163,7 @@ def download():
     filename = request.args.get("file")
     df = load_obj(filename)
     download = df.to_csv()
-    filepath = os.path.join("temp", filename+".csv")
+    filepath = os.path.join(APP_ROOT, "temp", filename+".csv")
     with open(filepath, 'w') as file:
         file.write(download)
     return send_file(filepath, attachment_filename=filename + ".csv", as_attachment=True, mimetype='text/csv')
@@ -171,16 +171,16 @@ def download():
 @app.route('/delete')
 def delete():
     filename = request.args.get("file")
-    path = os.path.join("uploads", filename + ".pkl")
+    path = os.path.join(APP_ROOT, UPLOAD_FOLDER, filename + ".pkl")
     if os.path.isfile(path):
         os.remove(path)
         flash("File "+filename+" was deleted.", "success")
-    return redirect('/networks')
+    return redirect("/"+URL+"networks")
 
 
 @app.route('/documentation')
 def documentation():
-    return render_template('documentation.html', section=request.args.get('section'))
+    return render_template('documentation.html', section=request.args.get('section'), url=URL)
 
 
 def allowed_file(filename):
@@ -194,4 +194,5 @@ def retrieve_or_default(dict, key, default):
 
 
 if __name__ == '__main__':
+    URL = ""
     app.run(port=5000, debug=True)
