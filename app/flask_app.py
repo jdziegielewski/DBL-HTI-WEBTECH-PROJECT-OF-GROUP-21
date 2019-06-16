@@ -2,7 +2,7 @@ import os, shutil, cloudpickle
 import json
 import numpy as np
 import pandas as pd
-from flask import Flask, render_template, request, redirect, flash, send_file, url_for
+from flask import Flask, render_template, request, redirect, flash, send_file
 from bokeh.embed import server_document
 from threading import Thread
 import bokeh_app
@@ -39,12 +39,7 @@ def index1():
     return render_template("index-thesis.html")
 
 
-@app.route('/visualization')
-def redirect_to_files():
-    return redirect(url_for('files'))
-
-
-@app.route('/visualization/<filename>', methods=['GET'])
+@app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
     script = server_document('http://localhost:5006/bokeh_app', arguments={'filename': filename})
     return render_template("visualization.html", script=script, template="Flask")
@@ -114,7 +109,7 @@ def edli2adm(dataframe):
     return adm
 
 
-@app.route("/files", methods=["POST", "GET"])
+@app.route("/networks", methods=["POST", "GET"])
 def files():
     if request.method == 'POST':
         if "file" not in request.files:
