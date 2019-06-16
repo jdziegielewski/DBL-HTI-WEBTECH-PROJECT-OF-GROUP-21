@@ -1,5 +1,5 @@
-import os, shutil, cloudpickle
-import json
+import os, shutil, cloudpickle #server file management
+import xlrd, json #For excel sheets and json files resp.
 import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request, redirect, flash, send_file
@@ -69,7 +69,6 @@ def store_local_adm(filename, sep=None, edgelist=False):
         dataframe.columns = np.append(np.delete(dataframe.columns.values, 0), 'NaNs')#dealing with end of line separators (malformed csv/txt)
         dataframe = dataframe.drop('NaNs', axis=1)
     if not edgelist:
-        print(dataframe)
         if adm_check(dataframe):
             return dataframe
         else:
