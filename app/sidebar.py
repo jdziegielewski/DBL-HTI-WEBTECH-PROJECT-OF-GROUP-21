@@ -27,18 +27,28 @@ def admatrix_exploration(param):
 def exploration_pane(nodelink_param, admatrix_param):
     return pn.Column('#Explore',
                      nodelink_exploration(nodelink_param),
-                     admatrix_exploration(admatrix_param))
+                     admatrix_exploration(admatrix_param),
+                     width=250)
 
 
 def edge_settings(param):
-    return pn.Column(param.edge_col,
-                     param.edge_alpha,
-                     param.esel_col,
-                     param.esel_alpha,
-                     param.bundle,
-                     param.directed,
-                     param.rendering_method,
+    dynamic = pn.Column(param.edge_alpha, width=200)
+    pane = pn.Column(param.rendering_method,
+                     param.edge_col,
+                     dynamic,
+                     param.nsel_col,
+                     param.nsel_alpha,
                      width=200)
+
+    def callback(*events):
+        for event in events:
+            if event.name == 'rendering_method':
+                dynamic.clear()
+                if event.new != 'Interactive':
+                    dynamic.append(param.edge_alpha)
+
+    param.watch(callback, ['rendering_method'])
+    return pane
 
 
 def node_settings(param):
@@ -46,19 +56,23 @@ def node_settings(param):
                      param.node_col,
                      param.line_col,
                      param.node_alpha,
-                     param.nsel_col,
-                     param.nsel_alpha,
                      width=200)
 
 
 def matrix_settings(param):
     return pn.Column(param.size,
-                     param.marker,
                      param.edge_col,
+                     param.marker,
                      param.alpha,
                      param.nons_alpha,
-                     param.esel_col,
-                     param.esel_alpha,
+                     width=200)
+
+
+def interaction_settings(nodelink_param, admatrix_param):
+    return pn.Column(nodelink_param.esel_col,
+                     nodelink_param.esel_alpha,
+                     admatrix_param.esel_col,
+                     admatrix_param.esel_alpha,
                      width=200)
 
 
@@ -75,13 +89,15 @@ def customization_pane(nodelink_param, admatrix_param):
                      pn.Tabs(('Edges', edge_settings(nodelink_param)),
                              ('Nodes', node_settings(nodelink_param)),
                              ('Matrix', matrix_settings(admatrix_param)),
+                             ('Links', interaction_settings(nodelink_param, admatrix_param)),
                              ('Other', other_settings(nodelink_param, admatrix_param)),
                              tabs_location='left'), width=250)
 
 
 def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view):
     panel = pn.Row(pn.Column(exploration_pane(nodelink_param, admatrix_param),
-                             customization_pane(nodelink_param, admatrix_param)),
+                             customization_pane(nodelink_param, admatrix_param),
+                             width=250),
                    nodelink_view,
                    admatrix_view)
     return panel
