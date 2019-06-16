@@ -1,16 +1,16 @@
 import os, shutil, cloudpickle
-import xlrd, json
+import json
 import numpy as np
-# import visualization
 import pandas as pd
-import networkx as nx
-from bokeh.embed import components
-from bokeh.client import pull_session
-from bokeh.embed import server_session
-from flask import Flask, render_template, session, request, redirect, flash, send_file
+from flask import Flask, render_template, request, redirect, flash, send_file, url_for
+from bokeh.embed import server_document
+from threading import Thread
+import bokeh_app
 
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
+
+Thread(target=bokeh_app.io_worker).start()
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
@@ -18,7 +18,7 @@ ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json", "zip", "gz", 
 
 LAST_FILE = ""
 
-#For saving datasets
+
 def save_obj(obj, name):
     with open('uploads/'+ name + '.pkl', 'wb') as file:
         cloudpickle.dump(obj, file)
@@ -31,48 +31,23 @@ def load_obj(name):
 
 @app.route('/')
 def index():
-    return render_template("index.html", last_file=get_last_file())
+    return render_template("index.html")
 
 
 @app.route('/thesis')
 def index1():
-    return render_template("index-thesis.html", last_file=get_last_file())
+    return render_template("index-thesis.html")
 
 
 @app.route('/visualization')
 def redirect_to_files():
-    with pull_session(url="http://localhost:5006/") as s:
-        script = server_session(session_id=s.id, url='http://localhost:5006/')
-    return render_template("visualization.html", script=script, last_file=get_last_file())
-    #if 'last_file' in session:
-        #return redirect('/visualization/' + session['last_file'])
-    #return redirect('/files')
+    return redirect(url_for('files'))
 
 
-@app.route('/visualization/<filename>')
-def visualize_file(filename):
-    session['last_file'] = filename
-    graph = load_local(filename)
-    dashboard = visualization.create_dashboard(graph, filename)
-    script, div = components(dashboard)
-    return render_template("visualization.html", script=script, div=div, last_file=get_last_file())
-
-
-@app.route('/close')
-def close_file():
-    session.clear()
-    return redirect('/files')
-
-
-def load_local(filename, sep=';'):
-    path = os.path.join(UPLOAD_FOLDER, filename)
-    dataframe = pd.read_csv(path, sep=sep, index_col=0)
-    dataframe = dataframe.stack().reset_index()
-    dataframe = dataframe[dataframe[0] > 0]
-    dataframe.columns = ['start', 'end', 'weight']
-    #dg = nx.from_pandas_adjacency(dataframe)
-    return dataframe
-    #load_obj(filename) # <- this function replaces this ^ function
+@app.route('/visualization/<filename>', methods=['GET'])
+def visualization(filename):
+    script = server_document('http://localhost:5006/bokeh_app', arguments={'filename': filename})
+    return render_template("visualization.html", script=script, template="Flask")
 
 
 def store_local_adm(filename, sep=None, edgelist=False):
@@ -183,7 +158,7 @@ def files():
         uploaded_files = os.listdir(target)
         for i in range(len(uploaded_files)):
             uploaded_files[i] = uploaded_files[i].replace('.pkl', '')
-        return render_template("files.html", files=uploaded_files, last_file=get_last_file())
+        return render_template("files.html", files=uploaded_files)
     # ^             ^
 
 
@@ -209,15 +184,11 @@ def delete():
 
 @app.route('/documentation')
 def documentation():
-    return render_template('documentation.html', section=request.args.get('section'), last_file=get_last_file())
+    return render_template('documentation.html', section=request.args.get('section'))
 
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def get_last_file():
-    return retrieve_or_default(session, 'last_file', 'Visualization')
 
 
 def retrieve_or_default(dict, key, default):
