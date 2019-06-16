@@ -9,10 +9,11 @@
         <!--link to file page, placeholder-->
         <p>
             <a href="/visualization/{{file}}">{{file}}</a>
-            <a href="/download?file={{file}}"><span style="float:right">Download</span></a>
             {% if file == last_file %}
                 <a href="/close"> Close</a>
             {% endif %}
+            <a href="/download?file={{file}}"><span style="float:right">Download</span></a></br>
+            <a href="/delete?file={{file}}"><span style="float:right">Delete</span></a></br>
         </p>
     {% endfor %}
 {% endif %}
