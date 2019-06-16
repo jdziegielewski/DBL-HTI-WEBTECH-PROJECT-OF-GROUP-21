@@ -1,7 +1,6 @@
 import os, shutil, cloudpickle
 import xlrd, json
 import numpy as np
-import time
 # import visualization
 import pandas as pd
 import networkx as nx
@@ -19,7 +18,7 @@ ALLOWED_EXTENSIONS = ["csv", "txt", "xlsx", "xls", "xlsm", "json", "zip", "gz", 
 
 LAST_FILE = ""
 
-#For saving SEPARATORS
+#For saving datasets
 def save_obj(obj, name):
     with open('uploads/'+ name + '.pkl', 'wb') as file:
         cloudpickle.dump(obj, file)
