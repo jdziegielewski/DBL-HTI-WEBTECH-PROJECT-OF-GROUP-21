@@ -10,7 +10,9 @@ import bokeh_app
 app = Flask(__name__)
 app.secret_key = b'|\xeb \xccP6\xbe\x9c0\x86\xa55\x8dz\x9f\x95'
 
-Thread(target=bokeh_app.io_worker).start()
+bokeh_thread = Thread(target=bokeh_app.io_worker)
+bokeh_thread.daemon = True
+bokeh_thread.start()
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
@@ -73,7 +75,7 @@ def store_local_adm(filename, sep=None, edgelist=False):
             return dataframe
         else:
             flash("Uploaded dataset does not have adjacency matrix format. Did you mean to upload an edge list?", "error")
-            return redirect('/files')
+            return redirect('/networks')
     else:
         dataframe['edge_idx'] = dataframe.index
         dataframe.columns = ['start', 'end', 'weight', 'edge_idx']
@@ -113,17 +115,17 @@ def files():
     if request.method == 'POST':
         if "file" not in request.files:
             flash("No file selected", "error")
-            return redirect("/files")
+            return redirect("/networks")
 
         file = request.files["file"]
 
         if file.filename == "":
             flash("No file selected", "error")
-            return redirect("/files")
+            return redirect("/networks")
         
         if not allowed_file(file.filename):
             flash("File has wrong extension, please upload a supported filetype", "error")
-            return redirect("/files")
+            return redirect("/networks")
     # v preprocess? v
         target = os.path.join(APP_ROOT, 'temp')
         if not os.path.isdir(target):
@@ -143,7 +145,7 @@ def files():
             save_obj(df, file.filename)
             os.remove(os.path.join("temp", file.filename))
             flash("File successfully uploaded!", "success")
-        return redirect("/files")
+        return redirect("/networks")
     else:
         if os.path.isdir('temp'):
             shutil.rmtree('temp')
@@ -173,7 +175,7 @@ def delete():
     if os.path.isfile(path):
         os.remove(path)
         flash("File "+filename+" was deleted.", "success")
-    return redirect('/files')
+    return redirect('/networks')
 
 
 @app.route('/documentation')
