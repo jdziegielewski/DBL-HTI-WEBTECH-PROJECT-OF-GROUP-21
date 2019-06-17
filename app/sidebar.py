@@ -38,6 +38,7 @@ def edge_settings(param):
                      dynamic,
                      param.nsel_col,
                      param.nsel_alpha,
+                     param.bundle,
                      width=200)
 
     def callback(*events):
@@ -94,9 +95,15 @@ def customization_pane(nodelink_param, admatrix_param):
                              tabs_location='left'), width=250)
 
 
+def info_pane(nodelink_param, admatrix_param):
+    jobs = pn.Column(pn.widgets.StaticText(value='aaa'))
+    return pn.Column('Info', jobs)
+
+
 def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view):
     panel = pn.Row(pn.Column(exploration_pane(nodelink_param, admatrix_param),
                              customization_pane(nodelink_param, admatrix_param),
+                             info_pane(nodelink_param, admatrix_param),
                              width=250),
                    nodelink_view,
                    admatrix_view)
