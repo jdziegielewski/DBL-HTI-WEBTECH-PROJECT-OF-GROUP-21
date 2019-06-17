@@ -46,7 +46,7 @@ def index1():
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
     script = server_document('http://localhost:5010/bokeh_app', arguments={'file': filename})
-    return render_template("visualization.html", script=script, url=URL, template="Flask")
+    return render_template("visualization.html", script=script, url=URL)
 
 
 def store_local_adm(filename, sep=None, edgelist=False):
