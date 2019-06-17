@@ -50,7 +50,7 @@ def modify_doc(doc):
 
 
 def io_worker():
-    server = Server({'/bokeh_app': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"])
+    server = Server({'/bokeh_app': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"], port=5010)
     server.start()
     server.io_loop.start()
     return

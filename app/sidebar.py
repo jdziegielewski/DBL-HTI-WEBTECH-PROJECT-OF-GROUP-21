@@ -44,7 +44,7 @@ def edge_settings(param):
         for event in events:
             if event.name == 'rendering_method':
                 dynamic.clear()
-                if event.new != 'Interactive':
+                if event.new != 0:
                     dynamic.append(param.edge_alpha)
 
     param.watch(callback, ['rendering_method'])

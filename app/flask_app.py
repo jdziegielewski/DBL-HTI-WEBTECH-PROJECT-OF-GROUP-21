@@ -1,5 +1,5 @@
-import os, shutil, cloudpickle #server file management
-import xlrd, json #For excel sheets and json files resp.
+import os, cloudpickle #server file management
+import json #For excel sheets and json files resp.
 import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request, redirect, flash, send_file
@@ -45,7 +45,7 @@ def index1():
 
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
-    script = server_document('http://localhost:5006/bokeh_app', arguments={'file': filename})
+    script = server_document('http://localhost:5010/bokeh_app', arguments={'file': filename})
     return render_template("visualization.html", script=script, url=URL, template="Flask")
 
 
