@@ -7,7 +7,7 @@ from holoviews import opts
 from holoviews.streams import Selection1D
 from scipy.sparse import csgraph, csc_matrix
 from sklearn.cluster import AgglomerativeClustering, SpectralClustering, AffinityPropagation
-
+from collections import OrderedDict
 
 def make_diagonal(names):
     return [(a, b, 0) for a, b in zip(names, reversed(names))]
@@ -66,34 +66,29 @@ def fiedler_vector_clustering(df):
 
 
 class AdMatrix(pm.Parameterized):
-    layout_dict = {'Default': (lambda self: make_diagonal(self.df.index), None),
-                   'Sorted': (lambda self: sorted_diagonal(self.df), None),
-                   'Agglomerative Clustering': (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count),
-                                                lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count]),
-                   'Affinity Propagation': (lambda self: affinity_propagation(self.df, self.affinity, self.affinity_damping, self.max_iteration),
-                                            lambda param: [param.affinity, param.affinity_damping, param.max_iteration]),
-                   'Reverse Cuthill-Mckee': (lambda self: reverse_cuthill_mckee(self.df), None),
-                   'Spectral Clustering': (lambda self: spectral_clustering(self.df),
-                                           lambda param: [param.agglomerative_cluster_count]),
-                   'Fiedler Vector Clustering': (lambda self: fiedler_vector_clustering(self.df), None)}
-    layout = pm.Selector(label='Matrix Ordering', objects=layout_dict, default=layout_dict['Default'])
-    markers = {'Square': 's', 'Circle': 'o', 'Cross': '+'}
-    edge_col = pm.Selector(label='Color', objects=settings.cmaps, default=settings.cmaps['Colorcet -- Fire'])
-    marker = pm.Selector(label='Symbol', objects=markers, default='s')
+    layout_dict = OrderedDict([('Default', (lambda self: make_diagonal(self.df.index), None)),
+                               ('Sorted', (lambda self: sorted_diagonal(self.df), None)),
+                               ('Agglomerative Clustering', (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count), lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count])),
+                               ('Affinity Propagation', (lambda self: affinity_propagation(self.df, self.affinity, self.affinity_damping, self.max_iteration), lambda param: [param.affinity, param.affinity_damping, param.max_iteration])),
+                               ('Reverse Cuthill-Mckee', (lambda self: reverse_cuthill_mckee(self.df), None)), ('Spectral Clustering', (lambda self: spectral_clustering(self.df), lambda param: [param.agglomerative_cluster_count])),
+                               ('Fiedler Vector Clustering', (lambda self: fiedler_vector_clustering(self.df), None))])
+    layout = pm.Selector(label='Matrix Ordering', objects=layout_dict)
+    edge_col = pm.Selector(label='Color', objects=settings.cmaps)
+    markers = OrderedDict([('Square', 's'), ('Circle', 'o'), ('Cross', '+')])
+    marker = pm.Selector(label='Symbol', objects=markers)
     alpha = pm.Magnitude(label='Alpha', default=0.5)
     nons_alpha = pm.Magnitude(label='Nonselection Alpha', default=0.1)
     size = pm.Number(label='Size', default=5, bounds=(1, 10))
     esel_col = pm.Selector(label='Nodes to Matrix Color', objects=settings.cmaps, default=['green'])
     esel_alpha = pm.Magnitude(label='Nodes to Matrix Alpha', default=0.7)
-    agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'], default='Complete')
+    agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'])
     agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=2)
-    affinity = pm.Selector(label='Affinity', objects={'Pre-computed': 'precomputed', 'Euclidean': 'euclidean'}, default='precomputed')
+    affinity = pm.Selector(label='Affinity', objects=OrderedDict([('Pre-computed', 'precomputed'), ('Euclidean', 'euclidean')]))
     affinity_damping = pm.Number(label='Damping', default=0.5, bounds=(0.5, 1.0))
     max_iteration = pm.Integer(label='Maximum Iterations', default=50, bounds=(10, 200))
-    x_axis = pm.Selector(label='Matrix X-Axis Labels', objects={'None': None, 'Top': 'top', 'Bottom': 'bottom'}, default=None)
-    y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects={'None': None, 'Left': 'left', 'Right': 'right'}, default=None)
-    toolbar = pm.Selector(objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
-                          label='Matrix Toolbar', default='above')
+    x_axis = pm.Selector(label='Matrix X-Axis Labels', objects=OrderedDict([('None', None), ('Top', 'top'), ('Bottom', 'bottom')]))
+    y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects=OrderedDict([('None', None), ('Left', 'left'), ('Right', 'right')]))
+    toolbar = pm.Selector(objects=OrderedDict([('Above', 'above'), ('Below', 'below'), ('Left', 'left'), ('Right', 'right'), ('Disable', 'disable')]), label='Matrix Toolbar')
 
     def __init__(self, edges, df, **params):
         super().__init__(**params)
