@@ -47,7 +47,7 @@ def index1():
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
     script = server_document(BOKEH_URL, arguments={'file': filename})
-    return render_template("visualization.html", script=script, url=URL)
+    return render_template("visualization.html", script=script, url=URL, static_fix='../')
 
 
 def store_local_adm(filename, sep=None, edgelist=False):
