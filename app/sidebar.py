@@ -95,15 +95,15 @@ def customization_pane(nodelink_param, admatrix_param):
                              tabs_location='left'), width=250)
 
 
-def info_pane(nodelink_param, admatrix_param):
-    jobs = pn.Column(pn.widgets.StaticText(value='aaa'))
-    return pn.Column('Info', jobs)
+def info_pane(node_count, edge_count):
+    return pn.Column('Info', pn.Column(pn.widgets.StaticText(value='Node count: ' + str(node_count)),
+                                       pn.widgets.StaticText(value='Edge count: ' + str(edge_count))))
 
 
-def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view):
+def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view, node_count, edge_count):
     panel = pn.Row(pn.Column(exploration_pane(nodelink_param, admatrix_param),
                              customization_pane(nodelink_param, admatrix_param),
-                             info_pane(nodelink_param, admatrix_param),
+                             info_pane(node_count, edge_count),
                              width=250),
                    nodelink_view,
                    admatrix_view)

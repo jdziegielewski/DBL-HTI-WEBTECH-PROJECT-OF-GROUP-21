@@ -14,10 +14,11 @@ class NodeLink(pm.Parameterized):
     layout_dict = {'Circular': nx.layout.circular_layout,
                    'Fruchterman-Reingold': nx.layout.fruchterman_reingold_layout,
                    'Kamada-Kawai': nx.layout.kamada_kawai_layout,
-                   'Spring': nx.layout.spring_layout}
+                   'Spring': nx.layout.spring_layout,
+                   'Spectral': nx.drawing.spectral_layout}
     layout = pm.ObjectSelector(label='Node-Link Layout', default='Circular', objects=layout_dict.keys())
 
-    edge_col = pm.Selector(label='Edge Color', objects=settings.cmaps, default=['blue', 'magenta', 'yellow'])
+    edge_col = pm.Selector(label='Edge Color', objects=settings.cmaps, default=settings.cmaps['Colorcet -- Fire'])
     edge_alpha = pm.Integer(label='Edge Alpha', default=200, bounds=(0, 255))
 
     nsel_col = pm.Selector(label='Nodes to Edges Color', objects=settings.cmaps, default=['green'])
@@ -31,8 +32,8 @@ class NodeLink(pm.Parameterized):
     line_col = pm.Color(label='Node Line Color', default='#ffffff')
     node_alpha = pm.Magnitude(label='Node Alpha', default=1)
 
-    bundle = pm.Selector(label='Edge Bundling', objects={'Off': False, 'On': True})
-    rendering_method = pm.Selector(label='Rendering Method', objects={'Interactive': 0, 'Datashaded': 1})
+    bundle = pm.Selector(label='Edge Bundling', objects={'Off': False, 'On': True}, default=False)
+    rendering_method = pm.Selector(label='Rendering Method', objects={'Interactive': 0, 'Datashaded': 1}, default=1)
 
     toolbar = pm.Selector(
         objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
@@ -59,12 +60,12 @@ class NodeLink(pm.Parameterized):
 
     def update_layout(self):
         new_graph = None
-        if self.last_layout is not self.layout:
+        if self.last_layout != self.layout:
             self.last_layout = self.layout
             self.graph = layout_nodes(self.graph, layout=self.layout_dict[self.last_layout])
             new_graph = self.graph
-            self.last_bundle = False
-        if self.last_bundle != self.bundle:
+            self.param.set_param(bundle=False)
+        elif self.last_bundle != self.bundle:
             self.last_bundle = self.bundle
             if self.last_bundle:
                 self.bundled_graph = bundle_graph(self.graph)
@@ -83,6 +84,7 @@ class NodeLink(pm.Parameterized):
 
     @pn.depends('layout', 'edge_col', 'edge_alpha')
     def draw_edges(self):
+        self.admatrix.param.set_param(edge_col=self.edge_col)
         self.update_layout()
         if not self.bundle:
             self.edges.opts(opts.EdgePaths(color='weight', cmap=self.edge_col, alpha=self.edge_alpha, line_width=hv.dim('weight')))
@@ -97,7 +99,7 @@ class NodeLink(pm.Parameterized):
             alpha=self.node_alpha))
         return self.nodes
 
-    @pn.depends('layout', 'bundle')
+    @pn.depends('layout')
     def draw_node_select(self, index):
         starts = self.get_graph().nodes.dimension_values('index')[index]
         if len(starts) == 0:
@@ -105,7 +107,7 @@ class NodeLink(pm.Parameterized):
         else:
             return self.get_graph().select(start=starts.tolist())
 
-    @pn.depends('layout', 'bundle')
+    @pn.depends('layout')
     def draw_edge_select(self, index=None):
         if not index:
             return hv.Curve(([0], [0]))
@@ -118,6 +120,7 @@ class NodeLink(pm.Parameterized):
         dyn_edges = hv.DynamicMap(self.draw_edges)
         if self.rendering_method == 1:
             if not self.bundle:
+                dyn_edges.opts(colorbar=True)
                 dyn_edges = aggregate(dyn_edges, aggregator=ds.mean('weight'), precompute=True)
                 dyn_edges = shade(dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha)
             else:
