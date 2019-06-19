@@ -121,7 +121,6 @@ class NodeLink(pm.Parameterized):
         dyn_edges = hv.DynamicMap(self.draw_edges)
         if self.rendering_method == 1:
             if not self.bundle:
-                dyn_edges.opts(colorbar=True)
                 dyn_edges = aggregate(dyn_edges, aggregator=ds.mean('weight'), precompute=True)
                 dyn_edges = shade(dyn_edges, cmap=self.param.edge_col, alpha=self.param.edge_alpha)
             else:
