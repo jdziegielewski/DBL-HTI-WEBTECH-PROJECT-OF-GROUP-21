@@ -70,7 +70,8 @@ class AdMatrix(pm.Parameterized):
                                ('Sorted', (lambda self: sorted_diagonal(self.df), None)),
                                ('Agglomerative Clustering', (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count), lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count])),
                                ('Affinity Propagation', (lambda self: affinity_propagation(self.df, self.affinity, self.affinity_damping, self.max_iteration), lambda param: [param.affinity, param.affinity_damping, param.max_iteration])),
-                               ('Reverse Cuthill-Mckee', (lambda self: reverse_cuthill_mckee(self.df), None)), ('Spectral Clustering', (lambda self: spectral_clustering(self.df), lambda param: [param.agglomerative_cluster_count])),
+                               ('Reverse Cuthill-Mckee', (lambda self: reverse_cuthill_mckee(self.df), None)),
+                               ('Spectral Clustering', (lambda self: spectral_clustering(self.df), lambda param: [param.agglomerative_cluster_count])),
                                ('Fiedler Vector Clustering', (lambda self: fiedler_vector_clustering(self.df), None))])
     layout = pm.Selector(label='Matrix Ordering', objects=layout_dict)
     edge_col = pm.Selector(label='Color', objects=settings.cmaps)
