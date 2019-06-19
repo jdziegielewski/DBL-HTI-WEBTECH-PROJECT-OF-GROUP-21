@@ -38,13 +38,14 @@ def edge_settings(param):
                      dynamic,
                      param.nsel_col,
                      param.nsel_alpha,
+                     param.bundle,
                      width=200)
 
     def callback(*events):
         for event in events:
             if event.name == 'rendering_method':
                 dynamic.clear()
-                if event.new != 'Interactive':
+                if event.new != 0:
                     dynamic.append(param.edge_alpha)
 
     param.watch(callback, ['rendering_method'])
@@ -76,27 +77,29 @@ def interaction_settings(nodelink_param, admatrix_param):
                      width=200)
 
 
-def other_settings(nodelink_param, admatrix_param):
+def other_settings(nodelink_param, admatrix_param, node_count, edge_count):
     return pn.Column(nodelink_param.toolbar,
                      admatrix_param.toolbar,
                      admatrix_param.x_axis,
                      admatrix_param.y_axis,
+                     pn.Column('Info', pn.Column(pn.widgets.StaticText(value='Node count: ' + str(node_count)),
+                                                 pn.widgets.StaticText(value='Edge count: ' + str(edge_count)))),
                      width=200)
 
 
-def customization_pane(nodelink_param, admatrix_param):
+def customization_pane(nodelink_param, admatrix_param, node_count, edge_count):
     return pn.Column('#Customize',
                      pn.Tabs(('Edges', edge_settings(nodelink_param)),
                              ('Nodes', node_settings(nodelink_param)),
                              ('Matrix', matrix_settings(admatrix_param)),
                              ('Links', interaction_settings(nodelink_param, admatrix_param)),
-                             ('Other', other_settings(nodelink_param, admatrix_param)),
+                             ('Other', other_settings(nodelink_param, admatrix_param, node_count, edge_count)),
                              tabs_location='left'), width=250)
 
 
-def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view):
+def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view, node_count, edge_count):
     panel = pn.Row(pn.Column(exploration_pane(nodelink_param, admatrix_param),
-                             customization_pane(nodelink_param, admatrix_param),
+                             customization_pane(nodelink_param, admatrix_param, node_count, edge_count),
                              width=250),
                    nodelink_view,
                    admatrix_view)

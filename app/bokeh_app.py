@@ -8,7 +8,8 @@ from tornado.ioloop import IOLoop
 from nodelink import NodeLink
 from admatrix import AdMatrix
 
-# renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
+hv.renderer('bokeh').instance(mode='server', webgl=True)
+
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = "uploads"
 
@@ -46,11 +47,12 @@ def modify_doc(doc):
     admatrix = AdMatrix(hv.Table(edges), df)
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
-    return sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view).server_doc(doc=doc)
+    return sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view, len(df.index), len(edges))\
+        .server_doc(doc=doc)
 
 
 def io_worker():
-    server = Server({'/bokeh_app': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"])
+    server = Server({'/bokeh_app': modify_doc}, io_loop=IOLoop(), allow_websocket_origin=["*"], port=5010)
     server.start()
     server.io_loop.start()
     return

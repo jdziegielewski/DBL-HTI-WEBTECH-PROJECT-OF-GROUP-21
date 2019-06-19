@@ -6,11 +6,8 @@ import numpy.linalg as la
 from holoviews import opts
 from holoviews.streams import Selection1D
 from scipy.sparse import csgraph, csc_matrix
-from sklearn.cluster import AgglomerativeClustering, SpectralClustering
-
-
-renderer = hv.renderer('bokeh').instance(mode='server', webgl=True)
-
+from sklearn.cluster import AgglomerativeClustering, SpectralClustering, AffinityPropagation
+from collections import OrderedDict
 
 def make_diagonal(names):
     return [(a, b, 0) for a, b in zip(names, reversed(names))]
@@ -20,32 +17,22 @@ def sorted_diagonal(df):
     return make_diagonal(df.index.sort_values())
 
 
-def agglomerative_clustering(df, linkage, n_clusters=2):
-    clustering = AgglomerativeClustering(affinity='precomputed', linkage=linkage, n_clusters=n_clusters).fit(df)
-    # clustering.
-
-    clusters = {}
-    for i in range(n_clusters):
-        clusters[i] = []
-        for j in range(len(clustering.labels_)):
-            if clustering.labels_[j] == i:
-                clusters[i].append(j)
-
-    final_clustering_order = []
-    for i in clusters:
-        final_clustering_order.append(clusters[i])
-    final_clustering_order = [val for sublist in final_clustering_order for val in sublist]
-
-    index_dataframe = df.index
-    final_clustering = []
-    for i in range(len(index_dataframe)):
-        final_clustering.append(index_dataframe[final_clustering_order[i]])
-
-    return make_diagonal(final_clustering)
+def agglomerative_clustering(df, affinity, linkage, n_clusters=2):
+    clustering = AgglomerativeClustering(affinity=affinity, linkage=linkage, n_clusters=n_clusters).fit(df)
+    ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
+    return make_diagonal(ordering)
 
 
-def spectral_clustering(df):
-    clustering = SpectralClustering().fit(df)
+def affinity_propagation(df, affinity, damping, max_iter):
+    clustering = AffinityPropagation(affinity=affinity, damping=damping, max_iter=max_iter).fit(df)
+    ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
+    return make_diagonal(ordering)
+
+
+def spectral_clustering(df, n_clusters=2):
+    clustering = SpectralClustering(affinity='precomputed', n_clusters=n_clusters).fit(df)
+    ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
+    return make_diagonal(ordering)
 
 
 def reverse_cuthill_mckee(df):
@@ -78,39 +65,31 @@ def fiedler_vector_clustering(df):
     return make_diagonal(final_clustering)
 
 
-# def create_ad_matrix_dataset(df, final_clustering):
- #    edge_list = df.stack().reset_index()
- #    edge_list = edge_list[edge_list[0] > 0]
- #    edge_list.columns = ['start', 'end', 'weight']
- #
- #    edge_list.start = pd.Categorical(edge_list.start, categories=final_clustering)
- #    edge_list.end = pd.Categorical(edge_list.end, categories=final_clustering)
- #    edge_list.sort_values(["start", "end"], inplace=True)
- #
- #    dataset = hv.Table(edge_list)
- #    return dataset
-
 class AdMatrix(pm.Parameterized):
-    layout_dict = {'Sorted': (lambda self: sorted_diagonal(self.df), None),
-                   'Agglomerative Clustering': (lambda self: agglomerative_clustering(self.df, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count),
-                                                lambda param: [param.agglomerative_linkage, param.agglomerative_cluster_count]),
-                   'Reverse Cuthill-Mckee': (lambda self: reverse_cuthill_mckee(self.df), None),
-                   'Fiedler Vector Clustering': (lambda self: fiedler_vector_clustering(self.df), None)}
+    layout_dict = OrderedDict([('Default', (lambda self: make_diagonal(self.df.index), None)),
+                               ('Sorted', (lambda self: sorted_diagonal(self.df), None)),
+                               ('Agglomerative Clustering', (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count), lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count])),
+                               ('Affinity Propagation', (lambda self: affinity_propagation(self.df, self.affinity, self.affinity_damping, self.max_iteration), lambda param: [param.affinity, param.affinity_damping, param.max_iteration])),
+                               ('Reverse Cuthill-Mckee', (lambda self: reverse_cuthill_mckee(self.df), None)),
+                               ('Spectral Clustering', (lambda self: spectral_clustering(self.df), lambda param: [param.agglomerative_cluster_count])),
+                               ('Fiedler Vector Clustering', (lambda self: fiedler_vector_clustering(self.df), None))])
     layout = pm.Selector(label='Matrix Ordering', objects=layout_dict)
-    markers = {'Square': 's', 'Circle': 'o', 'Cross': '+'}
-    edge_col = pm.Selector(label='Color', objects=settings.cmaps, default=['blue', 'magenta', 'yellow'])
-    marker = pm.Selector(label='Symbol', objects=markers, default='s')
-    alpha = pm.Magnitude(label='Alpha', default=0.7)
+    edge_col = pm.Selector(label='Color', objects=settings.cmaps)
+    markers = OrderedDict([('Square', 's'), ('Circle', 'o'), ('Cross', '+')])
+    marker = pm.Selector(label='Symbol', objects=markers)
+    alpha = pm.Magnitude(label='Alpha', default=0.5)
     nons_alpha = pm.Magnitude(label='Nonselection Alpha', default=0.1)
     size = pm.Number(label='Size', default=5, bounds=(1, 10))
     esel_col = pm.Selector(label='Nodes to Matrix Color', objects=settings.cmaps, default=['green'])
     esel_alpha = pm.Magnitude(label='Nodes to Matrix Alpha', default=0.7)
-    agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'], default='Complete')
+    agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'])
     agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=2)
-    x_axis = pm.Selector(label='Matrix X-Axis Labels', objects={'None': None, 'Top': 'top', 'Bottom': 'bottom'})
-    y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects={'None': None, 'Left': 'left', 'Right': 'right'})
-    toolbar = pm.Selector(objects={'Disable': 'disable', 'Above': 'above', 'Below': 'below', 'Left': 'left', 'Right': 'right'},
-                          label='Matrix Toolbar', default='above')
+    affinity = pm.Selector(label='Affinity', objects=OrderedDict([('Pre-computed', 'precomputed'), ('Euclidean', 'euclidean')]))
+    affinity_damping = pm.Number(label='Damping', default=0.5, bounds=(0.5, 1.0))
+    max_iteration = pm.Integer(label='Maximum Iterations', default=50, bounds=(10, 200))
+    x_axis = pm.Selector(label='Matrix X-Axis Labels', objects=OrderedDict([('None', None), ('Top', 'top'), ('Bottom', 'bottom')]))
+    y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects=OrderedDict([('None', None), ('Left', 'left'), ('Right', 'right')]))
+    toolbar = pm.Selector(objects=OrderedDict([('Above', 'above'), ('Below', 'below'), ('Left', 'left'), ('Right', 'right'), ('Disable', 'disable')]), label='Matrix Toolbar')
 
     def __init__(self, edges, df, **params):
         super().__init__(**params)
@@ -130,13 +109,14 @@ class AdMatrix(pm.Parameterized):
     def link_nodelink(self, nodelink):
         self.nodelink = nodelink
 
-    @pm.depends('layout', 'agglomerative_linkage', 'agglomerative_cluster_count')
+    @pm.depends('layout', 'agglomerative_linkage', 'agglomerative_cluster_count', 'affinity_damping', 'max_iteration', 'affinity')
     def draw_ordering(self):
         self.ordering = self.layout[0](self)
         return hv.Points(self.ordering, kdims=['x', 'y'], vdims=['z']).opts(alpha=0, nonselection_alpha=0)
 
     @pm.depends('edge_col', 'size', 'alpha', 'nons_alpha', 'marker', 'x_axis', 'y_axis', 'toolbar')
     def draw_admatrix(self):
+        self.nodelink.param.set_param(edge_col=self.edge_col)
         self.matrix.opts(opts.Points(size=self.size,
                                      alpha=self.alpha,
                                      xaxis=self.x_axis,
@@ -157,8 +137,8 @@ class AdMatrix(pm.Parameterized):
             return self.matrix.select(start=starts.tolist()).opts(opts.Points(alpha=self.esel_alpha, color='weight')).opts(cmap=self.esel_col)
 
     def view(self):
+        return self.dyn_order * self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
         #return dynspread(datashade(hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])))
         # return dynspread(datashade(hv.HeatMap(self.dataset, kdims=['start', 'end'], vdims=['weight']).opts(colorbar=True)))\
             # .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo])\
         #return self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
-        return self.dyn_order * self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
