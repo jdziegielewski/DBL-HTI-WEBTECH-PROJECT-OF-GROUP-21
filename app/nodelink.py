@@ -11,12 +11,13 @@ from collections import OrderedDict
 
 
 class NodeLink(pm.Parameterized):
-    layout_dict = OrderedDict([('Circular', nx.layout.circular_layout),
+    layout_dict = OrderedDict([('Random', nx.layout.random_layout),
+                               ('Circular', nx.layout.circular_layout),
                                ('Fruchterman-Reingold', nx.layout.fruchterman_reingold_layout),
                                ('Kamada-Kawai', nx.layout.kamada_kawai_layout),
-                               ('Spring', nx.layout.spring_layout),
-                               ('Spectral', nx.drawing.spectral_layout)])
-    layout = pm.Selector(label='Node-Link Layout', objects=layout_dict)
+                               ('Planar', nx.drawing.planar_layout),
+                               ('Spectral', nx.layout.spectral_layout)])
+    layout = pm.ObjectSelector(label='Node-Link Layout', objects=layout_dict.keys())
 
     edge_col = pm.Selector(label='Edge Color', objects=settings.cmaps)
     edge_alpha = pm.Integer(label='Edge Alpha', default=200, bounds=(0, 255))
@@ -41,7 +42,7 @@ class NodeLink(pm.Parameterized):
         super().__init__(**params)
         self.dataset = data
         self.graph = hv.Graph(data, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
-        self.graph = layout_nodes(self.graph, layout=nx.layout.circular_layout)
+        self.graph = layout_nodes(self.graph, layout=nx.drawing.random_layout)
         self.bundled_graph = None
         self.edges = self.graph.edgepaths
         self.edges = self.edges.add_dimension('weight', dim_pos=1, dim_val=self.dataset['weight'], vdim=True)
@@ -63,7 +64,7 @@ class NodeLink(pm.Parameterized):
         new_graph = None
         if self.last_layout != self.layout:
             self.last_layout = self.layout
-            self.graph = layout_nodes(self.graph, layout=self.last_layout)
+            self.graph = layout_nodes(self.graph, layout=self.layout_dict[self.layout])
             new_graph = self.graph
             self.param.set_param(bundle=False)
         elif self.last_bundle != self.bundle:
