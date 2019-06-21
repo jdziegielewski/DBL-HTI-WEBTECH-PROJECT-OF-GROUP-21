@@ -22,9 +22,6 @@ Launch
 ------
 
 	- python app/flask_app.py
-	- python app/bokeh_app.py filename
-		(filename must be one of uplaoded datasets)
-
 
 Use
 ---
