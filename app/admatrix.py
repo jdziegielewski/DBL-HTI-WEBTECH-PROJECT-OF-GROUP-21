@@ -1,3 +1,5 @@
+# Author: David
+
 import settings
 import operator
 import param as pm
@@ -9,39 +11,42 @@ from scipy.sparse import csgraph, csc_matrix
 from sklearn.cluster import AgglomerativeClustering, SpectralClustering, AffinityPropagation
 from collections import OrderedDict
 
+# Author: David
 def make_diagonal(names):
     return [(a, b, 0) for a, b in zip(names, reversed(names))]
 
-
+# Author: David
 def sorted_diagonal(df):
     return make_diagonal(df.index.sort_values())
 
-
+# Author: Sasha
+# Edited: David
 def agglomerative_clustering(df, affinity, linkage, n_clusters=2):
     clustering = AgglomerativeClustering(affinity=affinity, linkage=linkage, n_clusters=n_clusters).fit(df)
     ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
     return make_diagonal(ordering)
 
-
+# Author: David
 def affinity_propagation(df, affinity, damping, max_iter):
     clustering = AffinityPropagation(affinity=affinity, damping=damping, max_iter=max_iter).fit(df)
     ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
     return make_diagonal(ordering)
 
-
+# Author: David
 def spectral_clustering(df, n_clusters=2):
     clustering = SpectralClustering(affinity='precomputed', n_clusters=n_clusters).fit(df)
     ordering = [name for _, name in sorted(zip(clustering.labels_, df.index))]
     return make_diagonal(ordering)
 
-
+# Author: Sasha
+# Edited: David
 def reverse_cuthill_mckee(df):
     csc = csc_matrix(df)
     ordering = csgraph.reverse_cuthill_mckee(csc)
     indices = [df.index[i] for i in ordering]
     return make_diagonal(indices)
 
-
+# Author: Sasha
 def fiedler_vector_clustering(df):
     laplacian = csgraph.laplacian(df, normed=False)
     eigenvalues, eigenvectors = la.eig(laplacian)
@@ -65,6 +70,7 @@ def fiedler_vector_clustering(df):
     return make_diagonal(final_clustering)
 
 
+# Author: David
 class AdMatrix(pm.Parameterized):
     layout_dict = OrderedDict([('Default', (lambda self: make_diagonal(self.df.index), None)),
                                ('Sorted', (lambda self: sorted_diagonal(self.df), None)),

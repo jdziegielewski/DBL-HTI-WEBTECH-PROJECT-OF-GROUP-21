@@ -1,3 +1,5 @@
+# Author: Jeroen
+
 def getlinks(G):
     nodes = list(G)
     links = {}

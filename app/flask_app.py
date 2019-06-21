@@ -1,3 +1,5 @@
+# Author: David
+
 import os, cloudpickle #server file management
 import json #For excel sheets and json files resp.
 import numpy as np
@@ -22,34 +24,40 @@ URL = "group21/index.wsgi/"
 BOKEH_URL = 'http://dblserver.win.tue.nl:5010/bokeh_app'
 
 
+# Author: Theo
 def save_obj(obj, name):
     path = os.path.join(APP_ROOT, UPLOAD_FOLDER, name + '.pkl')
     with open(path, 'wb') as file:
         cloudpickle.dump(obj, file)
 
 
+# Author: Theo
 def load_obj(name):
     path = os.path.join(APP_ROOT, UPLOAD_FOLDER, name + '.pkl')
     with open(path, 'rb') as file:
         return cloudpickle.load(file)
 
 
+# Author: David
 @app.route('/')
 def index():
     return render_template("index.html", url=URL)
 
 
+# Author: Julian
 @app.route('/thesis')
 def index1():
     return render_template("index-thesis.html", url=URL)
 
 
+# Author: David
 @app.route('/networks/<filename>', methods=['GET'])
 def visualization(filename):
     script = server_document(BOKEH_URL, arguments={'file': filename})
     return render_template("visualization.html", script=script, url=URL, static_fix='../')
 
 
+# Author: Theo
 def store_local_adm(filename, sep=None, edgelist=False):
     #---------------------------------
     path = os.path.join(APP_ROOT, 'temp', filename)
@@ -89,6 +97,7 @@ def store_local_adm(filename, sep=None, edgelist=False):
             flash(flash("Uploaded dataset does not have edge list format. Did you mean to upload an adjacency matrix?", "error"))
 
 
+# Author: Theo
 def adm_check(dataframe):
     if dataframe.shape != (len(dataframe), len(dataframe)): #if not nxn matrix (wrong format) return False
         return False
@@ -96,12 +105,14 @@ def adm_check(dataframe):
     #----------------------------------
 
 
+# Author: Theo
 def edli_check(dataframe):
     if dataframe.shape != (len(dataframe), 4): #if not nx4 edge list (wrong format) return False
         return False
     return True
 
 
+# Author: Theo
 def edli2adm(dataframe):
     nodes = dataframe.start.unique()
     np.append(nodes, dataframe.end.unique())
@@ -113,6 +124,7 @@ def edli2adm(dataframe):
     return adm
 
 
+# Author: Theo
 @app.route("/networks", methods=["POST", "GET"])
 def files():
     if request.method == 'POST':
@@ -162,6 +174,8 @@ def files():
     # ^             ^
 
 
+# Author: Theo
+# Edited: David
 @app.route('/download')
 def download():
     filename = request.args.get("file")
@@ -173,6 +187,8 @@ def download():
     return resp
 
 
+# Author: Theo
+# Edited: David
 @app.route('/delete')
 def delete():
     filename = request.args.get("file")
@@ -183,11 +199,13 @@ def delete():
     return redirect("/"+URL+"networks")
 
 
+# Author: Theo
 @app.route('/documentation')
 def documentation():
     return render_template('documentation.html', section=request.args.get('section'), url=URL)
 
 
+# Author: Sasha
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 

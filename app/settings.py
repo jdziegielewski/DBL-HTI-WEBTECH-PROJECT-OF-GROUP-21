@@ -1,3 +1,5 @@
+# Author: David
+
 import colorcet
 from collections import OrderedDict
 

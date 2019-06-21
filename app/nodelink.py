@@ -1,3 +1,5 @@
+# Author: David
+
 import settings
 import param as pm
 import networkx as nx
