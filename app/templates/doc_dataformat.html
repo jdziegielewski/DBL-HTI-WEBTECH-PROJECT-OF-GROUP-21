@@ -7,7 +7,10 @@
     <h2>Data Formats</h2>
     <p>
         The tool accepts two formats; an adjacency matrix format and an edge list format.
-        The adjacency matrix format is a way of describing the relations in a network. 
+    </p>
+    <h3 id="admatrix">Adjacency Matrix</h3>
+    <p>
+        The adjacency matrix format is a way of describing the relations in a network.
         It is an n×n matrix, where n is the number of nodes.</br>
         The matrix is indexed by the unique node identifier in the columns as well as the rows.</br>
         The values in the matrix represent the weight of the relations.
@@ -48,7 +51,41 @@
             </table>
         </div>
         </p>
-    If you want to know how to follow this format in the various supported file types, navigate to its documentation page on the left.
+    To find out how to follow this format in your favourite file type, scroll down to look at the documentation for it.
+    </p>
+    <h3>Edge List</h3>
+    <p>
+        The edge list format is more compact than the adjacency matrix format for large datasets, at the cost of interpolation being needed to establish how many nodes are in a network.
+        The format looks as follows:</br></br>
+        <div style="margin-left:200px">
+        <table class="tg">
+                <tr>
+                  <th class="tg-0pky">start</th>
+                  <th class="tg-0pky">end</th>
+                  <th class="tg-0pky">weight</th>
+                </tr>
+                <tr>
+                  <td class="tg-0pky">Node1</td>
+                  <td class="tg-0pky">Node2</td>
+                  <td class="tg-0pky">1</td>
+                </tr>
+                <tr>
+                  <td class="tg-0pky">Node1</td>
+                  <td class="tg-0pky">Node3</td>
+                  <td class="tg-0pky">1</td>
+                </tr>
+                <tr>
+                  <td class="tg-0pky">Node2</td>
+                  <td class="tg-0pky">Node1</td>
+                  <td class="tg-0pky">1</td>
+                </tr>
+                <tr>
+                  <td class="tg-0pky">Node3</td>
+                  <td class="tg-0pky">Node1</td>
+                  <td class="tg-0pky">1</td>
+                </tr>
+              </table>
+            </div>
     </p>
 </div>
 <div id="csvtxt">
@@ -57,26 +94,33 @@
         You can choose any separator you like.</br>
         To get a correct result, the first line must start with the separator, followed by the node identifiers separated by the separator.</br>
         Every line after that should begin with a node identifier, followed by the weights of the relations separated by the separator.</br></br>
-        The adjacency matrix from the <a href="/{{ url }}documentation?section=general">general</a> page looks like this in CSV form (using default separator):</br></br>
+        The adjacency matrix from the general section looks like this in CSV form (using default separator):</br></br>
 
         ,Node1,Node2,Node3</br>
         Node1,0,1,1</br>
         Node2,1,0,0</br>
-        Node3,1,0,0</br>
+        Node3,1,0,0</br></br>
 
+        For edge lists, it should look like this:</br></br>
+
+        start,end,weight</br>
+        Node1,Node2,1</br>
+        Node1,Node3,1</br>
+        Node2,Node1,1</br>
+        Node3,Node1,1</br>
     </p>
 </div>
 <div id="xl">
     <h2>Excel sheets</h2>
-    <p>To get Excel sheets to work with our tool, you just need to make sure that it looks like the table on the <a href="/{{ url }}documentation?section=general">general</a> page in your Excel sheet editor.</br>
-        Supported Excel sheet formats are: xls, xlsx, xlsm.
+    <p>To get Excel sheets to work with our tool, you just need to make sure that it looks like one of the tables in the general section in your Excel Sheet editor.
+        Supported Excel sheet formats are: XLS, XLSX, XLSM.
     </p>
 </div>
 <div id="json">
     <h2>JSON</h2>
     <p>There are multiple ways to save a table in JSON. 
         To get our tool to work correctly, your JSON file must follow a specific layout.</br>
-        Here is a JSON string of network on the <a href="/{{ url }}documentation?section=general">general</a> page:</br></br>
+        Here is a JSON string of network in the general section:</br></br>
         <span>{</br>
             <span class="tab">"Node1": {</br>
                 <span class="tab2">"Node1":0,</span></br>
@@ -95,6 +139,36 @@
             <span class="tab">},</span></br>
         }</br></br>
         </span>
-        As you can see, this is a series of nested JSONs, with the node names as the key for the JSON describing the outgoing relations of that node.
+        As you can see, this is a series of nested JSONs, with the node names as the key for the JSON describing the outgoing relations of that node.</br></br>
+
+        Using the JSON file type for edge lists looks as follows:</br></br>
+        <span>{</br>
+            <span class="tab">"0": {</br>
+                <span class="tab2">"start":Node1,</span></br>
+                <span class="tab2">"end":Node2,</span></br>
+                <span class="tab2">"weight":1,</span></br>
+                <span class="tab2">"edge_idx":0,</span></br>
+            <span class="tab">},</span></br>
+            <span class="tab">"1": {</br>
+                <span class="tab2">"start":Node1,</span></br>
+                <span class="tab2">"end":Node3,</span></br>
+                <span class="tab2">"weight":1,</span></br>
+                <span class="tab2">"edge_idx":1,</span></br>
+            <span class="tab">},</span></br>
+            <span class="tab">"2": {</br>
+                <span class="tab2">"start":Node2,</span></br>
+                <span class="tab2">"end":Node1,</span></br>
+                <span class="tab2">"weight":1,</span></br>
+                <span class="tab2">"edge_idx":2,</span></br>
+            <span class="tab">},</span></br>
+            <span class="tab">"3": {</br>
+                <span class="tab2">"start":Node3,</span></br>
+                <span class="tab2">"end":Node1,</span></br>
+                <span class="tab2">"weight":1,</span></br>
+                <span class="tab2">"edge_idx":3,</span></br>
+            <span class="tab">},</span></br>
+        }</br></br>
+        </span>
+        This is also a nested JSON.
     </p>
 </div>
