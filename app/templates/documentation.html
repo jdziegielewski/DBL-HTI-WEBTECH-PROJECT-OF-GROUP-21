@@ -8,7 +8,6 @@
     <div class="col-sm-2 col-md-4 group">
         <h1><a href="/{{ url }}documentation?section=general">General</a></h1>
         <h1><a href="/{{ url }}documentation?section=data">Data Format</a></h1>
-        <h1><a href="/{{ url }}documentation?section=vis">Visualization</a></h1>
         <!--h1><a href="/{{ url }}documentation?section=json">JSON</a></h1-->
         <!--h1><a href="/{{ url }}documentation?section=edgelist">Edge lists??</a></h1-->
     </div>
@@ -18,9 +17,6 @@
 {% endif %}
 {% if section == 'data' %}
     {% include "doc_dataformat.html" %}
-{% endif %}
-{% if section == 'vis' %}
-    {% include "doc_visualization.html" %}
 {% endif %}
 </div>
 {% endblock content1 %}
