@@ -1,6 +1,7 @@
 import os
 import sidebar
 import cloudpickle
+import panel as pn
 import numpy as np
 import holoviews as hv
 from bokeh.server.server import Server
@@ -43,12 +44,14 @@ def modify_doc(doc):
     filename = str(args['file'][0].decode('utf-8'))
     df = load_local(filename)
     edges = get_edge_list(df)
+    msg = pn.Column()
     nodelink = NodeLink(hv.Table(add_missing_nodes(df, edges)))
     admatrix = AdMatrix(hv.Table(edges), df)
     nodelink.link_admatrix(admatrix)
     admatrix.link_nodelink(nodelink)
-    return sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view, len(df.index), len(edges))\
-        .server_doc(doc=doc)
+    layout, sbar = sidebar.create(nodelink.param, nodelink.view, admatrix.param, admatrix.view, len(df.index), len(edges))
+    nodelink.link_msg(sbar)
+    return layout.server_doc(doc=doc)
 
 
 def io_worker():

@@ -2,7 +2,8 @@ import panel as pn
 
 
 def nodelink_exploration(param):
-    return pn.Column(param.layout, width=250)
+    return pn.Column(param.layout,
+                     width=250)
 
 
 def admatrix_exploration(param):
@@ -98,9 +99,10 @@ def customization_pane(nodelink_param, admatrix_param, node_count, edge_count):
 
 
 def create(nodelink_param, nodelink_view, admatrix_param, admatrix_view, node_count, edge_count):
-    panel = pn.Row(pn.Column(exploration_pane(nodelink_param, admatrix_param),
-                             customization_pane(nodelink_param, admatrix_param, node_count, edge_count),
-                             width=250),
+    sbar = pn.Column(exploration_pane(nodelink_param, admatrix_param),
+                     customization_pane(nodelink_param, admatrix_param, node_count, edge_count),
+                     width=250)
+    panel = pn.Row(sbar,
                    nodelink_view,
                    admatrix_view)
-    return panel
+    return panel, sbar

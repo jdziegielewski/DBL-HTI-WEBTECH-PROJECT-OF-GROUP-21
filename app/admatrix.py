@@ -68,9 +68,9 @@ def fiedler_vector_clustering(df):
 class AdMatrix(pm.Parameterized):
     layout_dict = OrderedDict([('Default', (lambda self: make_diagonal(self.df.index), None)),
                                ('Sorted', (lambda self: sorted_diagonal(self.df), None)),
-                               ('Agglomerative Clustering', (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count), lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count])),
+                               ('Hierarchical Clustering', (lambda self: agglomerative_clustering(self.df, self.affinity, self.agglomerative_linkage.lower(), self.agglomerative_cluster_count), lambda param: [param.affinity, param.agglomerative_linkage, param.agglomerative_cluster_count])),
                                ('Affinity Propagation', (lambda self: affinity_propagation(self.df, self.affinity, self.affinity_damping, self.max_iteration), lambda param: [param.affinity, param.affinity_damping, param.max_iteration])),
-                               ('Reverse Cuthill-Mckee', (lambda self: reverse_cuthill_mckee(self.df), None)),
+                               ('Reverse Cuthill-McKee', (lambda self: reverse_cuthill_mckee(self.df), None)),
                                ('Spectral Clustering', (lambda self: spectral_clustering(self.df), lambda param: [param.agglomerative_cluster_count])),
                                ('Fiedler Vector Clustering', (lambda self: fiedler_vector_clustering(self.df), None))])
     layout = pm.Selector(label='Matrix Ordering', objects=layout_dict)
@@ -85,7 +85,7 @@ class AdMatrix(pm.Parameterized):
     agglomerative_linkage = pm.Selector(label='Linkage', objects=['Complete', 'Average', 'Single'])
     agglomerative_cluster_count = pm.Integer(label='Number of clusters', default=2)
     affinity = pm.Selector(label='Affinity', objects=OrderedDict([('Pre-computed', 'precomputed'), ('Euclidean', 'euclidean')]))
-    affinity_damping = pm.Number(label='Damping', default=0.5, bounds=(0.5, 1.0))
+    affinity_damping = pm.Number(label='Damping', default=0.5, bounds=(0.5, 0.95))
     max_iteration = pm.Integer(label='Maximum Iterations', default=50, bounds=(10, 200))
     x_axis = pm.Selector(label='Matrix X-Axis Labels', objects=OrderedDict([('None', None), ('Top', 'top'), ('Bottom', 'bottom')]))
     y_axis = pm.Selector(label='Matrix Y-Axis Labels', objects=OrderedDict([('None', None), ('Left', 'left'), ('Right', 'right')]))
@@ -138,7 +138,3 @@ class AdMatrix(pm.Parameterized):
 
     def view(self):
         return self.dyn_order * self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])
-        #return dynspread(datashade(hv.Points(self.dataset, kdims=['start', 'end'], vdims=['weight'])))
-        # return dynspread(datashade(hv.HeatMap(self.dataset, kdims=['start', 'end'], vdims=['weight']).opts(colorbar=True)))\
-            # .opts(xaxis=None, yaxis=None, toolbar='above', responsive=True, aspect=1, finalize_hooks=[disable_logo])\
-        #return self.dyn_matrix * hv.DynamicMap(self.draw_edge_select, streams=[self.nodelink.node_stream])

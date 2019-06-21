@@ -41,6 +41,8 @@ class NodeLink(pm.Parameterized):
     def __init__(self, data, **params):
         super().__init__(**params)
         self.dataset = data
+        self.msg = None
+        self.last_message = None
         self.graph = hv.Graph(data, kdims=['start', 'end'], vdims=['weight', 'edge_idx'])
         self.graph = layout_nodes(self.graph, layout=nx.drawing.random_layout)
         self.bundled_graph = None
@@ -60,11 +62,22 @@ class NodeLink(pm.Parameterized):
     def link_admatrix(self, admatrix):
         self.admatrix = admatrix
 
+    def link_msg(self, msg):
+        self.msg = msg
+
     def update_layout(self):
         new_graph = None
         if self.last_layout != self.layout:
             self.last_layout = self.layout
-            self.graph = layout_nodes(self.graph, layout=self.layout_dict[self.layout])
+            if self.last_message is not None:
+                self.last_message = None
+                self.msg.pop(0)
+            try:
+                self.graph = layout_nodes(self.graph, layout=self.layout_dict[self.layout])
+            except Exception:
+                if self.last_layout == 'Planar':
+                    self.last_message = 'Error: Graph is not planar'
+                    self.msg.insert(0, self.last_message)
             new_graph = self.graph
             self.param.set_param(bundle=False)
         elif self.last_bundle != self.bundle:
