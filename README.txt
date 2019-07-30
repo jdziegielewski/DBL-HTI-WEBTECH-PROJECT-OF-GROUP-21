@@ -28,3 +28,5 @@ Use
 ---
 
 	- Documentation is included on the website. The visualization tool is explained in detail in the report.
+
+The software is also located at http://dblserver.win.tue.nl/group21/
